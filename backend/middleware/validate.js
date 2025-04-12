@@ -1,25 +1,32 @@
-const Joi = require('joi');
+const { body, param, validationResult } = require('express-validator');
 
 const schemas = {
-  createPoll: Joi.object({
-    title: Joi.string().min(3).required(),
-    options: Joi.array().min(2).items(
-      Joi.object({
-        option: Joi.string().min(1).required()
-      })
-    ).required()
-  }),
-  
-  vote: Joi.object({
-    optionId: Joi.string().required()
-  })
+  createPoll: [
+    body('title').trim().isLength({ min: 3 }).withMessage('Title must be at least 3 characters long'),
+    body('options').isArray({ min: 2 }).withMessage('At least 2 options are required'),
+    body('options.*.option').trim().notEmpty().withMessage('Option text cannot be empty')
+  ],
+  vote: [
+    param('pollId').isMongoId().withMessage('Invalid poll ID'),
+    body('optionId').isMongoId().withMessage('Invalid option ID')
+  ],
+  addOption: [
+    param('pollId').isMongoId().withMessage('Invalid poll ID'),
+    body('option').trim().notEmpty().withMessage('Option text is required')
+  ]
 };
 
 const validate = (schema) => {
-  return (req, res, next) => {
-    const { error } = schemas[schema].validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+  return async (req, res, next) => {
+    await Promise.all(schemas[schema].map(validation => validation.run(req)));
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Validation failed',
+        errors: errors.array()
+      });
     }
     next();
   };
@@ -33,7 +40,7 @@ const validateCreatePoll = (req, res, next) => {
   if (!title?.trim()) {
     errors.push('Title is required');
   } else if (title.trim().length < 3) {
-    errors.push('Title must be at least 3 characters');
+    errors.push('Title must be at least 3 characters long');
   }
 
   if (!Array.isArray(options)) {
@@ -50,11 +57,12 @@ const validateCreatePoll = (req, res, next) => {
   if (errors.length > 0) {
     return res.status(400).json({
       status: 'error',
-      message: errors
+      message: 'Validation failed',
+      errors
     });
   }
 
   next();
 };
 
-module.exports = { validate, schemas, createPoll: validateCreatePoll };
+module.exports = { validate, schemas, validateCreatePoll };

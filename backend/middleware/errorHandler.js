@@ -1,36 +1,51 @@
 const errorHandler = (err, req, res, next) => {
-  // Log error with more details
   console.error('Error:', {
-    path: req.path,
-    method: req.method,
-    body: req.body,
-    error: err.message,
+    message: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    userId: req.user?._id
+    path: req.path,
+    method: req.method
   });
 
-  // MongoDB validation error
+  // Handle path-to-regexp errors
+  if (err.name === 'TypeError' && err.message.includes('Missing parameter name')) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Invalid route parameters',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+
+  // Handle validation errors
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       status: 'error',
-      message: Object.values(err.errors).map(e => e.message)
+      message: 'Validation error',
+      errors: Object.values(err.errors).map(e => e.message)
     });
   }
 
-  // MongoDB duplicate key error
-  if (err.code === 11000) {
-    return res.status(409).json({
+  // Handle cast errors (e.g., invalid ObjectId)
+  if (err.name === 'CastError') {
+    return res.status(400).json({
       status: 'error',
-      message: 'Resource already exists'
+      message: 'Invalid parameter format',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 
-  // Default error response
+  // Handle JWT errors
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Invalid authentication token'
+    });
+  }
+
+  // Handle other errors
   res.status(err.status || 500).json({
     status: 'error',
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message
+    message: err.message || 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 };
 
