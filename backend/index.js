@@ -101,20 +101,10 @@ app.use('/api/auth/register', authLimiter);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Redirect /auth/google and /auth/google/callback to /api/auth/google and /api/auth/google/callback
-app.use('/auth/google', (req, res, next) => {
-  req.url = '/api/auth/google';
-  next();
-});
-
-app.use('/auth/google/callback', (req, res, next) => {
-  req.url = '/api/auth/google/callback';
-  next();
-});
-
 // Routes
+app.use('/auth/google', require('./routes/auth').googleRouter);
 app.use('/api', require('./routes/index'));
-app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth', require('./routes/auth').router);
 app.use('/api/polls', require('./routes/poll'));
 
 // Health check endpoint with detailed status

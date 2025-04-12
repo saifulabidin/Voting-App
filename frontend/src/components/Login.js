@@ -60,7 +60,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_BACKEND_URL}/auth/google`;
+    window.location.href = `https://voting-app-production-3a8c.up.railway.app/auth/google`;
   };
 
   return (

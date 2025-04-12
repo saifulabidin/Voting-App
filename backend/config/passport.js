@@ -29,7 +29,8 @@ module.exports = function(passport) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: 'https://voting-app-production-3a8c.up.railway.app/auth/google/callback',
+        callbackURL: process.env.GOOGLE_CALLBACK_URL,
+        proxy: true
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

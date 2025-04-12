@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const googleRouter = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
@@ -115,20 +116,28 @@ router.post('/login', async (req, res, next) => {
   })(req, res, next);
 });
 
-// Google OAuth login route
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// Google OAuth routes
+googleRouter.get('/', 
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    prompt: 'select_account'
+  })
+);
 
-router.get(
-  '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+googleRouter.get(
+  '/callback',
+  passport.authenticate('google', { 
+    failureRedirect: `${process.env.FRONTEND_URL}/login` 
+  }),
   (req, res) => {
-    // Successful authentication
     const token = jwt.sign(
       { id: req.user._id, username: req.user.username },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
-    res.redirect(`/auth/success?token=${token}`);
+    
+    // Redirect to frontend with token
+    res.redirect(`${process.env.FRONTEND_URL}/auth-callback?token=${token}`);
   }
 );
 
@@ -148,4 +157,4 @@ router.get('/me', (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = { router, googleRouter };
