@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+*.test.js
+__tests__
+coverage
+docs
+README.md
+.gitignore
+.prettierrc
+.eslintrc
+.vscode/
+.idea/
