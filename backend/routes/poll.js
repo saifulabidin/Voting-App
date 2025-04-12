@@ -95,7 +95,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Update vote endpoint with transaction
+// Update vote endpoint with better error messages
 router.post('/:pollId/vote', protect, async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -112,7 +112,8 @@ router.post('/:pollId/vote', protect, async (req, res) => {
 
     if (existingPoll) {
       return res.status(400).json({ 
-        message: 'You have already voted on this poll' 
+        message: 'Anda hanya dapat memberikan satu suara untuk setiap polling',
+        code: 'DUPLICATE_VOTE'
       });
     }
 
@@ -143,7 +144,8 @@ router.post('/:pollId/vote', protect, async (req, res) => {
     await session.abortTransaction();
     console.error('Voting error:', err);
     res.status(400).json({ 
-      message: err.message || 'Error submitting vote'
+      message: 'Gagal mengirim vote. Silakan coba lagi.',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   } finally {
     session.endSession();
@@ -153,16 +155,35 @@ router.post('/:pollId/vote', protect, async (req, res) => {
 // Delete Poll (Authenticated)
 router.delete('/:pollId', protect, async (req, res) => {
   const { pollId } = req.params;
+  
   try {
     const poll = await Poll.findById(pollId);
-    if (!poll || poll.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'Not authorized or poll not found' });
+    
+    if (!poll) {
+      return res.status(404).json({ 
+        message: 'Polling tidak ditemukan' 
+      });
+    }
+
+    // Check if user is the creator of the poll
+    if (poll.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ 
+        message: 'Anda tidak memiliki izin untuk menghapus polling ini' 
+      });
     }
 
     await Poll.findByIdAndDelete(pollId);
-    res.json({ message: 'Poll deleted' });
+    
+    res.json({ 
+      message: 'Polling berhasil dihapus',
+      pollId 
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to delete poll' });
+    console.error('Delete error:', err);
+    res.status(500).json({ 
+      message: 'Gagal menghapus polling',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
