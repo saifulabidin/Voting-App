@@ -52,34 +52,27 @@ router.post('/login', async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ message: info.message });
     }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
     
-    req.logIn(user, (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Login error' });
+    // Reset login attempts
+    if (user.loginAttempts > 0) {
+      user.loginAttempts = 0;
+      user.lockUntil = null;
+      user.save();
+    }
+    
+    res.json({ 
+      token,
+      user: {
+        id: user._id,
+        username: user.username
       }
-      
-      // Generate JWT token
-      const token = jwt.sign(
-        { id: user._id, username: user.username },
-        process.env.JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-      
-      // Reset login attempts on successful login
-      if (user.loginAttempts > 0) {
-        user.loginAttempts = 0;
-        user.lockUntil = null;
-        user.save();
-      }
-      
-      res.json({ 
-        message: 'Logged in successfully',
-        token,
-        user: {
-          id: user._id,
-          username: user.username
-        }
-      });
     });
   })(req, res, next);
 });
