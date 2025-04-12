@@ -62,11 +62,18 @@ const PollDetails = () => {
       });
     } catch (err) {
       console.error('Voting error:', err);
-      if (err.response?.status === 400 && err.response?.data?.code === 'DUPLICATE_VOTE') {
-        setVoteStatus({
-          message: t('oneVoteError'),
-          type: 'error'
-        });
+      if (err.response?.status === 400) {
+        if (err.response.data?.code === 'DUPLICATE_VOTE') {
+          setVoteStatus({
+            message: t('ipVoteError'),
+            type: 'error'
+          });
+        } else {
+          setVoteStatus({
+            message: err.response.data?.message || t('voteError'),
+            type: 'error'
+          });
+        }
       } else {
         setVoteStatus({
           message: t('voteError'),

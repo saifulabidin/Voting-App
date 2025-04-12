@@ -238,7 +238,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-// Modified vote endpoint to support anonymous voting with analytics tracking
+// Modified vote endpoint to support IP-based voting
 router.post('/:pollId/vote', optionalAuth, async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -246,21 +246,7 @@ router.post('/:pollId/vote', optionalAuth, async (req, res) => {
   try {
     const { pollId } = req.params;
     const { optionId } = req.body;
-
-    // If user is authenticated, check if they've already voted
-    if (req.user) {
-      const existingPoll = await Poll.findOne({
-        _id: pollId,
-        voters: req.user._id
-      });
-
-      if (existingPoll) {
-        return res.status(400).json({ 
-          message: 'You can only vote once per poll',
-          code: 'DUPLICATE_VOTE'
-        });
-      }
-    }
+    const voterIP = req.ip; // Get voter's IP address
 
     const poll = await Poll.findById(pollId).session(session);
     
@@ -268,26 +254,47 @@ router.post('/:pollId/vote', optionalAuth, async (req, res) => {
       return res.status(404).json({ message: 'Poll not found' });
     }
 
-    const option = poll.options.id(optionId);
-    if (!option) {
-      return res.status(400).json({ message: 'Invalid option selected' });
+    // Check if IP has already voted
+    if (poll.voterIPs.includes(voterIP)) {
+      return res.status(400).json({ 
+        message: 'Anda sudah memberikan suara di polling ini',
+        code: 'DUPLICATE_VOTE'
+      });
     }
 
+    // If user is authenticated, also check user-based voting
+    if (req.user) {
+      const hasVoted = poll.voters.some(voter => 
+        voter.toString() === req.user._id.toString()
+      );
+
+      if (hasVoted) {
+        return res.status(400).json({ 
+          message: 'Anda sudah memberikan suara di polling ini',
+          code: 'DUPLICATE_VOTE'
+        });
+      }
+    }
+
+    const option = poll.options.id(optionId);
+    if (!option) {
+      return res.status(400).json({ message: 'Opsi tidak valid' });
+    }
+
+    // Record the vote
     option.votes += 1;
+    poll.voterIPs.push(voterIP);
     
-    // Only add to voters list if user is authenticated
+    // If user is authenticated, also record their user ID
     if (req.user) {
       poll.voters.push(req.user._id);
     }
         
     await poll.save({ session });
-    
-    // Track vote
     await Analytics.trackEvent(pollId, 'vote');
-    
     await session.commitTransaction();
     
-    // Return updated poll with user info
+    // Return updated poll
     const updatedPoll = await Poll.findById(pollId)
       .populate('createdBy', 'username')
       .populate('voters', 'username');
@@ -297,7 +304,7 @@ router.post('/:pollId/vote', optionalAuth, async (req, res) => {
     await session.abortTransaction();
     console.error('Voting error:', err);
     res.status(400).json({ 
-      message: 'Failed to submit vote. Please try again.',
+      message: 'Gagal mengirim vote. Silakan coba lagi.',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   } finally {
