@@ -9,11 +9,21 @@ const Register = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const validatePassword = (password) => {
+    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return strongPassword.test(password);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError('Password must contain at least 8 characters, including uppercase, lowercase, number and special character');
       return;
     }
 
@@ -53,6 +63,16 @@ const Register = () => {
             minLength="6"
             placeholder="Choose a password"
           />
+        </div>
+        <div className="password-requirements">
+          Password must contain:
+          <ul>
+            <li>At least 8 characters</li>
+            <li>One uppercase letter</li>
+            <li>One lowercase letter</li>
+            <li>One number</li>
+            <li>One special character (@$!%*?&)</li>
+          </ul>
         </div>
         <div className="form-group">
           <label htmlFor="confirmPassword">Confirm Password</label>

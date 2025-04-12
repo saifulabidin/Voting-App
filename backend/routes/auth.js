@@ -38,7 +38,10 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ message: 'Registration successful' });
   } catch (err) {
     console.error('Registration error:', err);
-    res.status(500).json({ message: 'Server error' });
+    if (err.message.includes('Password must contain')) {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: 'Server error during registration' });
   }
 });
 
