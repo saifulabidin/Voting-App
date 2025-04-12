@@ -28,14 +28,14 @@ API.interceptors.response.use(
       headers: error.config?.headers
     });
 
-    // Only redirect to login for authenticated routes when 401
-    const authenticatedRoutes = ['/create', '/polls/*/vote', '/polls/*/options'];
-    const isAuthenticatedRoute = authenticatedRoutes.some(route => {
+    // Only redirect to login for protected routes
+    const protectedRoutes = ['/create', '/polls/*/options'];
+    const isProtectedRoute = protectedRoutes.some(route => {
       const pattern = new RegExp(route.replace('*', '[^/]+'));
       return pattern.test(error.config?.url);
     });
 
-    if (error.response?.status === 401 && isAuthenticatedRoute) {
+    if (error.response?.status === 401 && isProtectedRoute) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

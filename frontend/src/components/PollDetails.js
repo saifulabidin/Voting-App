@@ -54,21 +54,6 @@ const PollDetails = () => {
   const handleVote = async (optionId) => {
     try {
       setError(null);
-      if (!isAuthenticated) {
-        // Save intended action for after login
-        sessionStorage.setItem('pendingVote', JSON.stringify({
-          pollId: id,
-          optionId: optionId
-        }));
-        // Show login prompt and redirect
-        setVoteStatus({
-          message: t('loginPrompt'),
-          type: 'info'
-        });
-        setTimeout(() => navigate('/login'), 2000);
-        return;
-      }
-
       const { data } = await API.post(`/polls/${id}/vote`, { optionId });
       setPoll(data);
       setVoteStatus({
@@ -77,9 +62,7 @@ const PollDetails = () => {
       });
     } catch (err) {
       console.error('Voting error:', err);
-      if (err.response?.status === 401) {
-        navigate('/login');
-      } else if (err.response?.status === 400) {
+      if (err.response?.status === 400 && err.response?.data?.code === 'DUPLICATE_VOTE') {
         setVoteStatus({
           message: t('oneVoteError'),
           type: 'error'
@@ -206,26 +189,17 @@ const PollDetails = () => {
           {poll.options.map((option) => (
             <div key={option._id} className="poll-option">
               <span>{option.option} - {option.votes} {t('votes')}</span>
-              {isAuthenticated ? (
-                poll.voters.includes(currentUserId) ? (
-                  <button 
-                    onClick={() => handleRemoveVote(option._id)}
-                    className="vote-button remove"
-                  >
-                    {t('removeVote')}
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => handleVote(option._id)}
-                    className="vote-button"
-                  >
-                    {t('voteButton')}
-                  </button>
-                )
+              {isAuthenticated && poll.voters.includes(currentUserId) ? (
+                <button 
+                  onClick={() => handleRemoveVote(option._id)}
+                  className="vote-button remove"
+                >
+                  {t('removeVote')}
+                </button>
               ) : (
                 <button 
                   onClick={() => handleVote(option._id)}
-                  className="vote-button login-required"
+                  className="vote-button"
                 >
                   {t('voteButton')}
                 </button>
