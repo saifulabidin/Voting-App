@@ -30,9 +30,9 @@ const Login = () => {
     setError('');
 
     try {
-      const recaptchaToken = await recaptchaRef.current.executeAsync();
+      const recaptchaToken = recaptchaRef.current.getValue();
       if (!recaptchaToken) {
-        setError(t('pleaseVerifyRecaptcha'));
+        setError(t('recaptchaRequired'));
         return;
       }
 
@@ -91,8 +91,8 @@ const Login = () => {
           <div className="recaptcha-container">
             <ReCAPTCHA
               ref={recaptchaRef}
-              size="invisible"
               sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+              theme="dark"
             />
           </div>
           <button type="submit" className="auth-button">
