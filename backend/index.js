@@ -80,7 +80,8 @@ const apiLimiter = rateLimit({
   legacyHeaders: false
 });
 
-app.use('/api/', apiLimiter);
+// Fix: Changed from '/api/' to '/api' to avoid path-to-regexp error
+app.use('/api', apiLimiter);
 
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
