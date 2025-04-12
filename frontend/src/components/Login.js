@@ -13,22 +13,30 @@ const Login = () => {
   const recaptchaRef = useRef(null);
 
   useEffect(() => {
-    if (window.grecaptcha) {
-      window.grecaptcha.reset();
-    }
+    // Load reCAPTCHA script
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
-    const recaptchaValue = recaptchaRef.current?.getValue();
-    if (!recaptchaValue) {
-      setError(t('recaptchaRequired'));
-      return;
-    }
-    
     try {
+      // Get reCAPTCHA response
+      const recaptchaValue = window.grecaptcha?.getResponse();
+      if (!recaptchaValue) {
+        setError(t('recaptchaRequired'));
+        return;
+      }
+      
       const { data } = await API.post('/auth/login', { 
         username, 
         password,
@@ -96,7 +104,7 @@ const Login = () => {
         <div className="or-divider">{t('orLoginWith')}</div>
 
         <button type="button" className="google-button" onClick={handleGoogleLogin}>
-          <img src="/google-icon.svg" alt="Google" />
+          <img src={`${process.env.PUBLIC_URL}/google-icon.svg`} alt="Google" />
           {t('continueWithGoogle')}
         </button>
 
@@ -104,7 +112,6 @@ const Login = () => {
           <div 
             className="g-recaptcha" 
             data-sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
-            ref={recaptchaRef}
           ></div>
         </div>
 

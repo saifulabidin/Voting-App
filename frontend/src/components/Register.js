@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
@@ -10,12 +10,18 @@ const Register = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const recaptchaRef = useRef(null);
 
   useEffect(() => {
-    if (window.grecaptcha) {
-      window.grecaptcha.reset();
-    }
+    // Load reCAPTCHA script
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const validatePassword = (password) => {
@@ -36,13 +42,13 @@ const Register = () => {
       return;
     }
 
-    const recaptchaValue = recaptchaRef.current?.getValue();
-    if (!recaptchaValue) {
-      setError(t('recaptchaRequired'));
-      return;
-    }
-
     try {
+      const recaptchaValue = window.grecaptcha?.getResponse();
+      if (!recaptchaValue) {
+        setError(t('recaptchaRequired'));
+        return;
+      }
+
       await API.post('/auth/register', { 
         username, 
         password,
@@ -102,7 +108,7 @@ const Register = () => {
         <div className="or-divider">{t('orRegisterWith')}</div>
 
         <button type="button" className="google-button" onClick={handleGoogleRegister}>
-          <img src="/google-icon.svg" alt="Google" />
+          <img src={`${process.env.PUBLIC_URL}/google-icon.svg`} alt="Google" />
           {t('continueWithGoogle')}
         </button>
 
@@ -110,7 +116,6 @@ const Register = () => {
           <div 
             className="g-recaptcha" 
             data-sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
-            ref={recaptchaRef}
           ></div>
         </div>
 
