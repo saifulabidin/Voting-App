@@ -12,6 +12,8 @@ const PollList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useLanguage();
 
+  const user = JSON.parse(localStorage.getItem('user'));
+
   const fetchPolls = useCallback(async () => {
     try {
       setLoading(true);
@@ -55,11 +57,24 @@ const PollList = () => {
     }
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError(t('loginRequired'));
+        return;
+      }
+      
       await API.delete(`/polls/${pollId}`);
       setPolls(polls.filter(poll => poll._id !== pollId));
+      setError(null); // Clear any existing errors on success
     } catch (err) {
       console.error('Delete error:', err);
-      setError(t('voteError'));
+      if (err.response?.status === 401) {
+        setError(t('loginRequired'));
+      } else if (err.response?.status === 403) {
+        setError(t('notAuthorized'));
+      } else {
+        setError(t('deleteError'));
+      }
     }
   };
 
@@ -102,7 +117,7 @@ const PollList = () => {
                 <span style={{ marginRight: '1rem' }}>
                   {t('createdBy')} {poll.createdBy?.username || t('unknown')}
                 </span>
-                {poll.createdBy?._id === localStorage.getItem('userId') && (
+                {poll.createdBy?._id === user?.id && (
                   <button
                     onClick={(e) => handleDelete(poll._id, e)}
                     className="delete-button"

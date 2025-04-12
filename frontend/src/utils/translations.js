@@ -79,7 +79,11 @@ export const translations = {
     engagement: "Engagement Metrics",
     views: "Views",
     shares: "Shares",
-    optionAdds: "New Options"
+    optionAdds: "New Options",
+    loginRequired: "Please log in to delete polls",
+    notAuthorized: "You are not authorized to delete this poll",
+    deleteError: "Failed to delete poll. Please try again.",
+    loadError: "Error loading polls"
   },
   id: {
     loading: "Memuat detail polling...",
@@ -161,6 +165,10 @@ export const translations = {
     engagement: "Metrik Keterlibatan",
     views: "Dilihat",
     shares: "Dibagikan",
-    optionAdds: "Opsi Baru"
+    optionAdds: "Opsi Baru",
+    loginRequired: "Silakan masuk untuk menghapus polling",
+    notAuthorized: "Anda tidak memiliki izin untuk menghapus polling ini",
+    deleteError: "Gagal menghapus polling. Silakan coba lagi.",
+    loadError: "Gagal memuat polling"
   }
 };
