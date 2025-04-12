@@ -44,19 +44,24 @@ const analyticsSchema = new mongoose.Schema({
 
 // Static method to track various events
 analyticsSchema.statics.trackEvent = async function(pollId, eventType) {
-  const timeField = eventType + 'sOverTime';
-  const totalField = 'total' + eventType.charAt(0).toUpperCase() + eventType.slice(1) + 's';
-  
-  const update = {
-    $inc: { [totalField]: 1 },
-    $push: { [timeField]: new Date() }
-  };
+  try {
+    const timeField = eventType + 'sOverTime';
+    const totalField = 'total' + eventType.charAt(0).toUpperCase() + eventType.slice(1) + 's';
+    
+    const update = {
+      $inc: { [totalField]: 1 },
+      $push: { [timeField]: new Date() }
+    };
 
-  await this.findOneAndUpdate(
-    { pollId },
-    update,
-    { upsert: true }
-  );
+    await this.findOneAndUpdate(
+      { pollId },
+      update,
+      { upsert: true, new: true }
+    );
+  } catch (err) {
+    console.error(`Analytics tracking error for ${eventType}:`, err);
+    // Don't throw the error so it doesn't affect the main operation
+  }
 };
 
 const Analytics = mongoose.model('Analytics', analyticsSchema);

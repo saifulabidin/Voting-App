@@ -15,16 +15,22 @@ const PollList = () => {
   const fetchPolls = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const { data } = await API.get(`/polls?page=${currentPage}&search=${searchTerm}`);
-      setPolls(data.polls);
-      setTotalPages(data.totalPages);
+      if (data && Array.isArray(data.polls)) {
+        setPolls(data.polls);
+        setTotalPages(data.totalPages || 1);
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (err) {
       console.error('Error fetching polls:', err);
-      setError(err.response?.data?.message || 'Error loading polls');
+      setError(t('loadError') || 'Error loading polls');
+      setPolls([]);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, t]);
 
   useEffect(() => {
     fetchPolls();

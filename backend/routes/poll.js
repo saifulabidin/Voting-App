@@ -176,22 +176,24 @@ router.post('/:pollId/options', protect, async (req, res) => {
 // Modified get polls route with pagination and search
 router.get('/', optionalAuth, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
     const search = req.query.search || '';
-    const skip = (page - 1) * limit;
 
     // Create search query
     const searchQuery = search 
       ? { title: { $regex: search, $options: 'i' } }
       : {};
 
-    const totalPolls = await Poll.countDocuments(searchQuery);
-    const polls = await Poll.find(searchQuery)
-      .populate('createdBy', 'username')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    const [totalPolls, polls] = await Promise.all([
+      Poll.countDocuments(searchQuery),
+      Poll.find(searchQuery)
+        .populate('createdBy', 'username')
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec()
+    ]);
 
     res.json({
       polls,
@@ -201,7 +203,10 @@ router.get('/', optionalAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('Fetch polls error:', err);
-    res.status(500).json({ message: 'Failed to fetch polls' });
+    res.status(500).json({ 
+      message: 'Failed to fetch polls',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
   }
 });
 
