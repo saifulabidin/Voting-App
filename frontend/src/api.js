@@ -1,8 +1,11 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_URL || 'http://voting-app-production-3a8c.up.railway.app/api',
+  baseURL: process.env.REACT_APP_BACKEND_URL,
   withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  }
 });
 
 API.interceptors.request.use((config) => {
