@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
@@ -12,13 +12,11 @@ const PollList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useLanguage();
 
-  const fetchPolls = async (page = 1, search = searchTerm) => {
+  const fetchPolls = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
-      const { data } = await API.get(`/polls?page=${page}&limit=10&search=${search}`);
+      const { data } = await API.get(`/polls?page=${currentPage}&search=${searchTerm}`);
       setPolls(data.polls);
-      setCurrentPage(data.currentPage);
       setTotalPages(data.totalPages);
     } catch (err) {
       console.error('Error fetching polls:', err);
@@ -26,11 +24,11 @@ const PollList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchTerm]);
 
   useEffect(() => {
     fetchPolls();
-  }, []);
+  }, [fetchPolls]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -39,7 +37,7 @@ const PollList = () => {
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      fetchPolls(newPage);
+      setCurrentPage(newPage);
     }
   };
 

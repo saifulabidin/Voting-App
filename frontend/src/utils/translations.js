@@ -25,6 +25,7 @@ export const translations = {
     register: "Register",
     pollList: "Poll List",
     votes: "votes",
+    pollVotes: "Total Votes",
     createPollTitle: "Create Poll",
     pollTitle: "Poll Title",
     option: "Option",
@@ -77,7 +78,6 @@ export const translations = {
     totalOptionsAdded: "Options Added",
     engagement: "Engagement Metrics",
     views: "Views",
-    votes: "Votes",
     shares: "Shares",
     optionAdds: "New Options"
   },
@@ -107,6 +107,7 @@ export const translations = {
     register: "Daftar",
     pollList: "Daftar Polling",
     votes: "suara",
+    pollVotes: "Total Suara",
     createPollTitle: "Buat Polling",
     pollTitle: "Judul Polling",
     option: "Opsi",
@@ -159,7 +160,6 @@ export const translations = {
     totalOptionsAdded: "Opsi Ditambahkan",
     engagement: "Metrik Keterlibatan",
     views: "Dilihat",
-    votes: "Suara",
     shares: "Dibagikan",
     optionAdds: "Opsi Baru"
   }

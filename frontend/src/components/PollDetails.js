@@ -45,11 +45,11 @@ const PollDetails = () => {
   }, [fetchPoll]);
 
   useEffect(() => {
-    if (poll && poll._id) {
-      // Track view when poll is loaded
+    if (poll?._id) {
+      // Track view when poll is loaded and changes
       API.trackView(poll._id).catch(console.error);
     }
-  }, [poll?._id]);
+  }, [poll?._id]); // Only depend on poll._id instead of entire poll object
 
   const handleVote = async (optionId) => {
     try {

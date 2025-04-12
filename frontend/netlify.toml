@@ -1,8 +1,12 @@
+[build]
+  base = "frontend"
+  publish = "frontend/build"
+  command = "CI=false npm run build"
+
+[build.environment]
+  REACT_APP_BACKEND_URL = "https://voting-app-production-3a8c.up.railway.app/api"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[build]
-  command = "npm run build"
-  publish = "build"
