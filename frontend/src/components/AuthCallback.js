@@ -7,11 +7,23 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const token = searchParams.get('token');
+    const userData = searchParams.get('userData');
     const error = searchParams.get('error');
 
     if (token) {
       // Simpan token
       localStorage.setItem('token', token);
+      
+      // Simpan data user jika ada
+      if (userData) {
+        try {
+          const user = JSON.parse(decodeURIComponent(userData));
+          localStorage.setItem('user', JSON.stringify(user));
+        } catch (err) {
+          console.error('Error parsing user data:', err);
+        }
+      }
+      
       navigate('/');
     } else if (error) {
       // Handle error cases

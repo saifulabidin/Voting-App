@@ -138,8 +138,15 @@ googleRouter.get('/callback',
         { expiresIn: '24h' }
       );
 
-      // Redirect ke frontend dengan token
-      res.redirect(`${process.env.FRONTEND_URL}/auth-callback?token=${token}`);
+      // Prepare user data to send
+      const userData = {
+        id: req.user._id,
+        username: req.user.username
+      };
+
+      // Redirect ke frontend dengan token dan user data
+      const encodedUserData = encodeURIComponent(JSON.stringify(userData));
+      res.redirect(`${process.env.FRONTEND_URL}/auth-callback?token=${token}&userData=${encodedUserData}`);
     } catch (error) {
       console.error('Google callback error:', error);
       res.redirect(`${process.env.FRONTEND_URL}/login?error=token_generation_failed`);

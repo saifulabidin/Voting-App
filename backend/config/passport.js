@@ -34,29 +34,37 @@ module.exports = function(passport) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let user = await User.findOne({ googleId: profile.id });
+          const email = profile.emails[0].value;
+          
+          // Coba cari user berdasarkan googleId atau email
+          let user = await User.findOne({ 
+            $or: [
+              { googleId: profile.id },
+              { username: email }
+            ]
+          });
           
           if (!user) {
-            // Cek jika email sudah terdaftar
-            user = await User.findOne({ username: profile.emails[0].value });
-            
-            if (user) {
-              // Update existing user dengan Google ID
-              user.googleId = profile.id;
-              await user.save();
-            } else {
-              // Buat user baru
-              user = new User({
-                googleId: profile.id,
-                username: profile.emails[0].value,
-                // Tidak perlu password untuk user Google
-              });
-              await user.save();
-            }
+            // Buat user baru jika tidak ditemukan
+            user = new User({
+              username: email,
+              googleId: profile.id,
+              // Password tidak diperlukan untuk login Google
+              // tambahkan field lain yang mungkin berguna
+              // displayName: profile.displayName,
+              // firstName: profile.name.givenName,
+              // lastName: profile.name.familyName
+            });
+            await user.save();
+          } else if (!user.googleId) {
+            // Update existing user dengan googleId jika belum ada
+            user.googleId = profile.id;
+            await user.save();
           }
           
           return done(null, user);
         } catch (err) {
+          console.error('Google auth error:', err);
           return done(err, null);
         }
       }
