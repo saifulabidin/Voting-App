@@ -5,13 +5,23 @@ const API = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
+  },
+  validateStatus: status => {
+    return status < 500; // Don't reject if status is less than 500
   }
 });
 
 // Add response interceptor to handle errors
 API.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

@@ -3,6 +3,7 @@ const Poll = require('../models/Poll');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const { validate } = require('../middleware/validate');
 const router = express.Router();
 
 // Middleware to authenticate user
@@ -23,20 +24,24 @@ const protect = (req, res, next) => {
 };
 
 // Create Poll (Authenticated)
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, validate('createPoll'), async (req, res) => {
   const { title, options } = req.body;
 
-  if (!title || !options.length) {
-    return res.status(400).json({ message: 'Poll must have a title and options' });
-  }
-
-  const poll = new Poll({ title, options, createdBy: req.user._id });
-
   try {
+    const poll = new Poll({
+      title,
+      options: options.map(opt => ({ option: opt })),
+      createdBy: req.user._id
+    });
+
     const createdPoll = await poll.save();
-    res.json(createdPoll);
+    res.status(201).json(createdPoll);
   } catch (err) {
-    res.status(500).json({ message: 'Failed to create poll' });
+    console.error('Poll creation error:', err);
+    res.status(500).json({ 
+      message: 'Failed to create poll',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
