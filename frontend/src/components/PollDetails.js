@@ -8,6 +8,8 @@ const PollDetails = () => {
   const [poll, setPoll] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [voteError, setVoteError] = useState(null);
+  const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
     const fetchPoll = async () => {
@@ -32,10 +34,19 @@ const PollDetails = () => {
 
   const handleVote = async (optionId) => {
     try {
+      setVoteError(null);
       const { data } = await API.post(`/polls/${id}/vote`, { optionId });
       setPoll(data);
+      setHasVoted(true);
     } catch (err) {
-      console.error(err);
+      console.error('Voting error:', err);
+      const message = err.response?.data?.message || 'Error submitting vote';
+      setVoteError(message);
+      
+      // Handle specific error cases
+      if (err.response?.status === 401) {
+        navigate('/login');
+      }
     }
   };
 
@@ -47,14 +58,23 @@ const PollDetails = () => {
     <div>
       <h1>{poll.title}</h1>
       <p>Created by: {poll.createdBy?.username || 'Unknown'}</p>
+      {voteError && <p style={{ color: 'red' }}>{voteError}</p>}
       <ul>
         {poll.options.map((option) => (
           <li key={option._id}>
             {option.option} - {option.votes} votes
-            <button onClick={() => handleVote(option._id)}>Vote</button>
+            <button 
+              onClick={() => handleVote(option._id)}
+              disabled={hasVoted || poll.voters.includes(localStorage.getItem('userId'))}
+            >
+              {hasVoted ? 'Voted' : 'Vote'}
+            </button>
           </li>
         ))}
       </ul>
+      {hasVoted && (
+        <p style={{ color: 'green' }}>Thank you for voting!</p>
+      )}
     </div>
   );
 };

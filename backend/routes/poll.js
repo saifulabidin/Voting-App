@@ -104,18 +104,27 @@ router.post('/:pollId/vote', protect, async (req, res) => {
     const { pollId } = req.params;
     const { optionId } = req.body;
 
-    const poll = await Poll.findOne({ 
+    // Check if user has already voted
+    const existingPoll = await Poll.findOne({
       _id: pollId,
-      voters: { $ne: req.user._id }
-    }).session(session);
+      voters: req.user._id
+    });
 
+    if (existingPoll) {
+      return res.status(400).json({ 
+        message: 'You have already voted on this poll' 
+      });
+    }
+
+    const poll = await Poll.findById(pollId).session(session);
+    
     if (!poll) {
-      throw new Error('Poll not found or already voted');
+      return res.status(404).json({ message: 'Poll not found' });
     }
 
     const option = poll.options.id(optionId);
     if (!option) {
-      throw new Error('Option not found');
+      return res.status(400).json({ message: 'Invalid option selected' });
     }
 
     option.votes += 1;
@@ -124,30 +133,20 @@ router.post('/:pollId/vote', protect, async (req, res) => {
     await poll.save({ session });
     await session.commitTransaction();
     
-    res.json(poll);
+    // Return updated poll with user info
+    const updatedPoll = await Poll.findById(pollId)
+      .populate('createdBy', 'username')
+      .populate('voters', 'username');
+      
+    res.json(updatedPoll);
   } catch (err) {
     await session.abortTransaction();
-    res.status(400).json({ message: err.message });
+    console.error('Voting error:', err);
+    res.status(400).json({ 
+      message: err.message || 'Error submitting vote'
+    });
   } finally {
     session.endSession();
-  }
-});
-
-// ✅ Add new option to a poll (Authenticated)
-router.post('/:pollId/options', protect, async (req, res) => {
-  const { pollId } = req.params;
-  const { newOption } = req.body;
-
-  try {
-    const poll = await Poll.findById(pollId);
-    if (!poll) return res.status(404).json({ message: 'Poll not found' });
-
-    poll.options.push({ option: newOption });
-    await poll.save();
-
-    res.json(poll);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to add new option' });
   }
 });
 
