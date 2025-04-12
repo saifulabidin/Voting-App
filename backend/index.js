@@ -109,8 +109,43 @@ app.use('/auth', require('./routes/auth'));
 app.use('/polls', require('./routes/poll'));
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+app.get('/health', async (req, res) => {
+  try {
+    // Check MongoDB connection
+    const dbStatus = mongoose.connection.readyState === 1;
+    
+    // Check memory usage
+    const memoryUsage = process.memoryUsage();
+    
+    // System status check
+    const systemStatus = {
+      uptime: process.uptime(),
+      timestamp: Date.now(),
+      memoryUsage: {
+        heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024), // Convert to MB
+        heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
+        rss: Math.round(memoryUsage.rss / 1024 / 1024)
+      }
+    };
+
+    if (!dbStatus) {
+      throw new Error('Database connection lost');
+    }
+
+    res.json({
+      status: 'healthy',
+      database: { connected: dbStatus },
+      system: systemStatus,
+      message: 'All systems operational'
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(503).json({
+      status: 'unhealthy',
+      error: error.message,
+      message: 'System experiencing issues'
+    });
+  }
 });
 
 // Favicon
