@@ -115,6 +115,23 @@ router.post('/login', async (req, res, next) => {
   })(req, res, next);
 });
 
+// Google OAuth login route
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    // Successful authentication
+    const token = jwt.sign(
+      { id: req.user._id, username: req.user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    res.redirect(`/auth/success?token=${token}`);
+  }
+);
+
 // Logout
 router.get('/logout', (req, res) => {
   req.logout(() => {

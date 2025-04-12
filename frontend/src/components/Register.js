@@ -64,7 +64,7 @@ const Register = () => {
   };
 
   const handleGoogleRegister = () => {
-    // Google registration implementation will go here
+    window.location.href = `${process.env.REACT_APP_BACKEND_URL}/auth/google`;
   };
 
   return (
