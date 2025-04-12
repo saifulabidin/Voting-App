@@ -16,6 +16,9 @@ const PollDetails = () => {
   const [newOption, setNewOption] = useState('');
   const [showAddOption, setShowAddOption] = useState(false);
 
+  const isAuthenticated = !!localStorage.getItem('token');
+  const currentUserId = localStorage.getItem('userId');
+
   const fetchPoll = useCallback(async () => {
     try {
       setLoading(true);
@@ -41,6 +44,16 @@ const PollDetails = () => {
   const handleVote = async (optionId) => {
     try {
       setError(null);
+      if (!isAuthenticated) {
+        // Store the intended vote action
+        sessionStorage.setItem('pendingVote', JSON.stringify({
+          pollId: id,
+          optionId: optionId
+        }));
+        navigate('/login');
+        return;
+      }
+
       const { data } = await API.post(`/polls/${id}/vote`, { optionId });
       setPoll(data);
       setVoteStatus({
@@ -49,7 +62,9 @@ const PollDetails = () => {
       });
     } catch (err) {
       console.error('Voting error:', err);
-      if (err.response?.status === 400) {
+      if (err.response?.status === 401) {
+        navigate('/login');
+      } else if (err.response?.status === 400) {
         setVoteStatus({
           message: 'Anda hanya dapat memberikan satu suara untuk setiap polling',
           type: 'error'
@@ -138,7 +153,7 @@ const PollDetails = () => {
             Share Poll
           </button>
           
-          {poll.createdBy?._id === localStorage.getItem('userId') && (
+          {isAuthenticated && poll.createdBy?._id === currentUserId && (
             <button 
               onClick={handleDelete}
               className="delete-button"
@@ -162,10 +177,10 @@ const PollDetails = () => {
               <span>{option.option} - {option.votes} votes</span>
               <button 
                 onClick={() => handleVote(option._id)}
-                disabled={poll.voters.includes(localStorage.getItem('userId'))}
+                disabled={isAuthenticated && poll.voters.includes(currentUserId)}
                 className="vote-button"
               >
-                {poll.voters.includes(localStorage.getItem('userId')) ? 'Voted' : 'Vote'}
+                {isAuthenticated && poll.voters.includes(currentUserId) ? 'Voted' : 'Vote'}
               </button>
             </div>
           ))}
@@ -175,7 +190,7 @@ const PollDetails = () => {
           <PollChart poll={poll} />
         </div>
 
-        {!poll.voters.includes(localStorage.getItem('userId')) && (
+        {isAuthenticated && !poll.voters.includes(currentUserId) && (
           <div className="add-option-section">
             {!showAddOption ? (
               <button 
@@ -202,6 +217,12 @@ const PollDetails = () => {
                 </button>
               </form>
             )}
+          </div>
+        )}
+
+        {!isAuthenticated && (
+          <div className="login-prompt">
+            <p>Log in to add new options or track your votes!</p>
           </div>
         )}
       </div>
