@@ -13,7 +13,7 @@ require('./config/passport')(passport);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Trust proxy settings for Vercel
+// Trust proxy settings for Railway
 app.set('trust proxy', true);
 
 // CORS configuration
@@ -31,15 +31,37 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// Session configuration
+// MongoDB Connection - use MONGO_URI from Railway
+const mongoUri = process.env.MONGO_URI;
+if (!mongoUri) {
+  console.error('MONGO_URI environment variable is not set');
+  process.exit(1);
+}
+
+mongoose.connect(mongoUri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB Connected'))
+.catch(err => {
+  console.error('MongoDB Connection Error:', err);
+  process.exit(1);
+});
+
+// Session configuration with MongoStore
+const sessionStore = MongoStore.create({
+  mongoUrl: mongoUri,
+  collectionName: 'sessions',
+  ttl: 24 * 60 * 60, // 1 day
+  autoRemove: 'native',
+  touchAfter: 24 * 3600 // time period in seconds
+});
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    ttl: 24 * 60 * 60 // 1 day
-  }),
+  store: sessionStore,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
@@ -48,10 +70,13 @@ app.use(session({
   }
 }));
 
-// Rate limiting
+// Rate limiting based on environment variables
+const rateLimitWindow = parseInt(process.env.RATE_LIMIT_WINDOW || '15', 10) * 60 * 1000; // Convert minutes to ms
+const rateLimitMax = parseInt(process.env.RATE_LIMIT_MAX || '100', 10);
+
 const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5,
+  windowMs: rateLimitWindow,
+  max: rateLimitMax,
   message: 'Too many login attempts, please try again later'
 });
 
@@ -62,24 +87,19 @@ app.use('/auth/register', authLimiter);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB Connected'))
-.catch(err => console.error('MongoDB Connection Error:', err));
-
 // Routes
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/polls', require('./routes/poll'));
 
-// Health check endpoint
+// Health check endpoint with detailed status
 app.get('/health', (req, res) => {
+  const isMongoConnected = mongoose.connection.readyState === 1;
   res.json({ 
-    status: 'healthy',
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    status: isMongoConnected ? 'healthy' : 'unhealthy',
+    mongodb: isMongoConnected ? 'connected' : 'disconnected',
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -91,6 +111,9 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Only start server if MongoDB connects successfully
+mongoose.connection.once('open', () => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+  });
 });

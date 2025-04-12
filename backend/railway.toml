@@ -12,5 +12,8 @@ restartPolicyMaxRetries = 5
 minReplicas = 1
 maxReplicas = 3
 
+[deploy.env]
+NODE_ENV = "production"
+
 [deploy.lifecycle]
 release = "echo 'Starting Voting App Backend'"
