@@ -8,6 +8,7 @@ import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation';
 import { LanguageProvider } from './context/LanguageContext';
+import AuthCallback from './components/AuthCallback';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
               <CreatePoll />
             </ProtectedRoute>
           } />
+          <Route path="/auth-callback" element={<AuthCallback />} />
         </Routes>
       </Router>
     </LanguageProvider>

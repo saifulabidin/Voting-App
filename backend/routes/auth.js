@@ -124,20 +124,26 @@ googleRouter.get('/',
   })
 );
 
-googleRouter.get(
-  '/callback',
+googleRouter.get('/callback',
   passport.authenticate('google', { 
-    failureRedirect: `${process.env.FRONTEND_URL}/login` 
+    failureRedirect: `${process.env.FRONTEND_URL}/login?error=google_auth_failed`,
+    session: false 
   }),
   (req, res) => {
-    const token = jwt.sign(
-      { id: req.user._id, username: req.user.username },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-    
-    // Redirect to frontend with token
-    res.redirect(`${process.env.FRONTEND_URL}/auth-callback?token=${token}`);
+    try {
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: req.user._id, username: req.user.username },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Redirect ke frontend dengan token
+      res.redirect(`${process.env.FRONTEND_URL}/auth-callback?token=${token}`);
+    } catch (error) {
+      console.error('Google callback error:', error);
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=token_generation_failed`);
+    }
   }
 );
 

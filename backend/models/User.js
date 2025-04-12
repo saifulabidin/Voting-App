@@ -12,8 +12,15 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: function() {
+      return !this.googleId; // Password hanya required jika bukan login Google
+    },
     minlength: [6, 'Password must be at least 6 characters']
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true
   },
   loginAttempts: {
     type: Number,
@@ -24,15 +31,15 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+// Hanya hash password jika password diubah dan bukan user Google
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || this.googleId) return next();
   
   try {
     if (this.password.length < 8) {
       throw new Error('Password must be at least 8 characters');
     }
     
-    // Check password strength
     const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!strongPassword.test(this.password)) {
       throw new Error('Password must contain uppercase, lowercase, number and special character');

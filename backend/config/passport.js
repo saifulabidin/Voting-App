@@ -29,22 +29,35 @@ module.exports = function(passport) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL,
+        callbackURL: 'https://voting-app-production-3a8c.up.railway.app/auth/google/callback',
         proxy: true
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
           let user = await User.findOne({ googleId: profile.id });
+          
           if (!user) {
-            user = new User({
-              googleId: profile.id,
-              username: profile.emails[0].value,
-            });
-            await user.save();
+            // Cek jika email sudah terdaftar
+            user = await User.findOne({ username: profile.emails[0].value });
+            
+            if (user) {
+              // Update existing user dengan Google ID
+              user.googleId = profile.id;
+              await user.save();
+            } else {
+              // Buat user baru
+              user = new User({
+                googleId: profile.id,
+                username: profile.emails[0].value,
+                // Tidak perlu password untuk user Google
+              });
+              await user.save();
+            }
           }
-          done(null, user);
+          
+          return done(null, user);
         } catch (err) {
-          done(err, null);
+          return done(err, null);
         }
       }
     )
