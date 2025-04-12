@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 
 // Register
 router.post('/register', async (req, res) => {
@@ -57,6 +58,13 @@ router.post('/login', async (req, res, next) => {
         return res.status(500).json({ message: 'Login error' });
       }
       
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: user._id, username: user.username },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
       // Reset login attempts on successful login
       if (user.loginAttempts > 0) {
         user.loginAttempts = 0;
@@ -66,6 +74,7 @@ router.post('/login', async (req, res, next) => {
       
       res.json({ 
         message: 'Logged in successfully',
+        token,
         user: {
           id: user._id,
           username: user.username
