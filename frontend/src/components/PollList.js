@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../api';
+import { useLanguage } from '../context/LanguageContext';
 
 const PollList = () => {
   const [polls, setPolls] = useState([]);
   const [error, setError] = useState('');
+  const { t } = useLanguage();
 
   const fetchPolls = async () => {
     try {
@@ -12,7 +14,7 @@ const PollList = () => {
       setPolls(data);
     } catch (err) {
       console.error(err);
-      setError('Gagal memuat daftar polling');
+      setError('Failed to load polls');
     }
   };
 
@@ -23,7 +25,7 @@ const PollList = () => {
   const handleDelete = async (pollId, event) => {
     event.preventDefault(); // Prevent navigation
     
-    if (!window.confirm('Apakah Anda yakin ingin menghapus polling ini?')) {
+    if (!window.confirm(t('deleteConfirm'))) {
       return;
     }
 
@@ -32,13 +34,13 @@ const PollList = () => {
       setPolls(polls.filter(poll => poll._id !== pollId));
     } catch (err) {
       console.error('Delete error:', err);
-      setError('Gagal menghapus polling');
+      setError(t('voteError'));
     }
   };
 
   return (
     <div>
-      <h1>Daftar Polling</h1>
+      <h1>{t('pollList')}</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {polls.map((poll) => (
@@ -52,21 +54,19 @@ const PollList = () => {
             borderRadius: '4px'
           }}>
             <Link to={`/polls/${poll._id}`}>{poll.title}</Link>
-            {poll.createdBy?._id === localStorage.getItem('userId') && (
-              <button
-                onClick={(e) => handleDelete(poll._id, e)}
-                style={{
-                  backgroundColor: '#ff4444',
-                  color: 'white',
-                  padding: '5px 10px',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Hapus
-              </button>
-            )}
+            <div>
+              <span style={{ marginRight: '1rem' }}>
+                {t('createdBy')} {poll.createdBy?.username || t('unknown')}
+              </span>
+              {poll.createdBy?._id === localStorage.getItem('userId') && (
+                <button
+                  onClick={(e) => handleDelete(poll._id, e)}
+                  className="delete-button"
+                >
+                  {t('deleteButton')}
+                </button>
+              )}
+            </div>
           </li>
         ))}
       </ul>

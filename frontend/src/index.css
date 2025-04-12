@@ -242,6 +242,105 @@ h2 {
   color: #6c757d;
 }
 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.language-button {
+  background-color: #333;
+  color: white;
+  border: 1px solid white;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.language-button:hover {
+  background-color: #555;
+}
+
+.language-button:active {
+  transform: scale(0.95);
+}
+
+.create-poll-form {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.create-poll-form input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.create-poll-form button {
+  padding: 0.75rem 1.5rem;
+  margin: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.create-poll-form button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+}
+
+.create-poll-form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.create-poll-form button[type="button"] {
+  background-color: #6c757d;
+  color: white;
+}
+
+.create-poll-form button[type="button"]:hover {
+  background-color: #5a6268;
+}
+
+.create-poll-form button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.create-poll-form h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
 @media (max-width: 600px) {
   .poll-content {
     gap: 20px;
@@ -253,5 +352,10 @@ h2 {
 
   .add-option-form input {
     width: 100%;
+  }
+
+  .create-poll-form {
+    margin: 1rem;
+    padding: 1rem;
   }
 }

@@ -7,31 +7,34 @@ import Login from './components/Login';
 import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation';
+import { LanguageProvider } from './context/LanguageContext';
 
 const App = () => {
   return (
-    <Router>
-      <Navigation />
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <PollList />
-          </ProtectedRoute>
-        } />
-        <Route path="/polls/:id" element={
-          <ProtectedRoute>
-            <PollDetails />
-          </ProtectedRoute>
-        } />
-        <Route path="/create" element={
-          <ProtectedRoute>
-            <CreatePoll />
-          </ProtectedRoute>
-        } />
-      </Routes>
-    </Router>
+    <LanguageProvider>
+      <Router>
+        <Navigation />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <PollList />
+            </ProtectedRoute>
+          } />
+          <Route path="/polls/:id" element={
+            <ProtectedRoute>
+              <PollDetails />
+            </ProtectedRoute>
+          } />
+          <Route path="/create" element={
+            <ProtectedRoute>
+              <CreatePoll />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 };
 

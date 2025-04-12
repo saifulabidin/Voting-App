@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
+import { useLanguage } from '../context/LanguageContext';
 
 const CreatePoll = () => {
   const [title, setTitle] = useState('');
@@ -8,21 +9,22 @@ const CreatePoll = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const validateForm = () => {
     if (!title.trim()) {
-      setError('Title is required');
+      setError(t('titleRequired'));
       return false;
     }
     
     if (title.length < 3) {
-      setError('Title must be at least 3 characters');
+      setError(t('titleMinLength'));
       return false;
     }
 
     const validOptions = options.filter(opt => opt.trim());
     if (validOptions.length < 2) {
-      setError('At least 2 valid options are required');
+      setError(t('optionsRequired'));
       return false;
     }
 
@@ -37,7 +39,6 @@ const CreatePoll = () => {
     
     setLoading(true);
     try {
-      // Check if user is logged in
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
@@ -56,10 +57,10 @@ const CreatePoll = () => {
       navigate(`/polls/${data._id}`);
     } catch (err) {
       if (err.response?.status === 401) {
-        setError('Please log in to create a poll');
+        setError(t('loginToCreate'));
         navigate('/login');
       } else {
-        setError(err.response?.data?.message || 'Failed to create poll');
+        setError(t('createError'));
       }
       console.error('Poll creation error:', err);
     } finally {
@@ -74,11 +75,11 @@ const CreatePoll = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h1>Create Poll</h1>
+    <form onSubmit={handleSubmit} className="create-poll-form">
+      <h1>{t('createPollTitle')}</h1>
       <input
         type="text"
-        placeholder="Poll Title"
+        placeholder={t('pollTitle')}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
@@ -86,16 +87,18 @@ const CreatePoll = () => {
         <input
           key={index}
           type="text"
-          placeholder={`Option ${index + 1}`}
+          placeholder={`${t('option')} ${index + 1}`}
           value={option}
           onChange={(e) => handleOptionChange(index, e.target.value)}
         />
       ))}
       <button type="button" onClick={() => setOptions([...options, ''])}>
-        Add Option
+        {t('addMoreOption')}
       </button>
-      <button type="submit" disabled={loading}>Create</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <button type="submit" disabled={loading}>
+        {t('create')}
+      </button>
+      {error && <p className="error-message">{error}</p>}
     </form>
   );
 };

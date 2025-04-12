@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../api';
 import PollChart from './PollChart';
+import { useLanguage } from '../context/LanguageContext';
 
 const PollDetails = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ const PollDetails = () => {
   });
   const [newOption, setNewOption] = useState('');
   const [showAddOption, setShowAddOption] = useState(false);
+  const { t, language, toggleLanguage } = useLanguage();
 
   const isAuthenticated = !!localStorage.getItem('token');
   const currentUserId = localStorage.getItem('userId');
@@ -45,7 +47,6 @@ const PollDetails = () => {
     try {
       setError(null);
       if (!isAuthenticated) {
-        // Store the intended vote action
         sessionStorage.setItem('pendingVote', JSON.stringify({
           pollId: id,
           optionId: optionId
@@ -57,7 +58,7 @@ const PollDetails = () => {
       const { data } = await API.post(`/polls/${id}/vote`, { optionId });
       setPoll(data);
       setVoteStatus({
-        message: 'Vote berhasil dikirim!',
+        message: t('voteSuccess'),
         type: 'success'
       });
     } catch (err) {
@@ -66,12 +67,12 @@ const PollDetails = () => {
         navigate('/login');
       } else if (err.response?.status === 400) {
         setVoteStatus({
-          message: 'Anda hanya dapat memberikan satu suara untuk setiap polling',
+          message: t('oneVoteError'),
           type: 'error'
         });
       } else {
         setVoteStatus({
-          message: 'Gagal mengirim vote. Silakan coba lagi.',
+          message: t('voteError'),
           type: 'error'
         });
       }
@@ -80,38 +81,19 @@ const PollDetails = () => {
 
   const handleAddOption = async (e) => {
     e.preventDefault();
-    if (!newOption.trim()) {
-      setError('Option cannot be empty');
-      return;
-    }
-
-    try {
-      const { data } = await API.post(`/polls/${id}/options`, {
-        option: newOption.trim()
-      });
-      setPoll(data);
-      setNewOption('');
-      setShowAddOption(false);
-      setVoteStatus({
-        message: 'New option added successfully!',
-        type: 'success'
-      });
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add new option');
-    }
+    if (!newOption.trim()) return;
+    const { data } = await API.post(`/polls/${id}/options`, {
+      option: newOption.trim()
+    });
+    setPoll(data);
+    setNewOption('');
+    setShowAddOption(false);
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this poll?')) {
-      return;
-    }
-
-    try {
+    if (window.confirm(t('deleteConfirm'))) {
       await API.delete(`/polls/${id}`);
       navigate('/polls');
-    } catch (err) {
-      console.error('Delete error:', err);
-      setError(err.response?.data?.message || 'Failed to delete poll');
     }
   };
 
@@ -120,37 +102,40 @@ const PollDetails = () => {
     if (navigator.share) {
       navigator.share({
         title: poll.title,
-        text: 'Check out this poll!',
+        text: t('shareText'),
         url: url
-      }).catch(console.error);
+      })
     } else {
-      navigator.clipboard.writeText(url).then(() => {
-        setVoteStatus({
-          message: 'Poll link copied to clipboard!',
-          type: 'success'
-        });
-      }).catch(() => {
-        setVoteStatus({
-          message: 'Failed to copy link',
-          type: 'error'
-        });
-      });
+      navigator.clipboard.writeText(url)
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return (
+    <div className="loading-container">
+      <div className="loading-spinner"></div>
+      <p>{t('loading')}</p>
+    </div>
+  );
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!poll) return null;
 
   return (
     <div className="poll-details">
       <div className="poll-header">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+          <button 
+            onClick={toggleLanguage}
+            className="language-button"
+          >
+            {language === 'en' ? 'ID' : 'EN'}
+          </button>
+        </div>
         <h1>{poll.title}</h1>
-        <p>Created by: {poll.createdBy?.username || 'Unknown'}</p>
+        <p>{t('createdBy')} {poll.createdBy?.username || t('unknown')}</p>
         
         <div className="poll-actions">
           <button onClick={handleShare} className="share-button">
-            Share Poll
+            {t('shareButton')}
           </button>
           
           {isAuthenticated && poll.createdBy?._id === currentUserId && (
@@ -158,7 +143,7 @@ const PollDetails = () => {
               onClick={handleDelete}
               className="delete-button"
             >
-              Delete Poll
+              {t('deleteButton')}
             </button>
           )}
         </div>
@@ -180,7 +165,7 @@ const PollDetails = () => {
                 disabled={isAuthenticated && poll.voters.includes(currentUserId)}
                 className="vote-button"
               >
-                {isAuthenticated && poll.voters.includes(currentUserId) ? 'Voted' : 'Vote'}
+                {isAuthenticated && poll.voters.includes(currentUserId) ? t('voted') : t('voteButton')}
               </button>
             </div>
           ))}
@@ -197,7 +182,7 @@ const PollDetails = () => {
                 onClick={() => setShowAddOption(true)}
                 className="add-option-button"
               >
-                Add New Option
+                {t('addOption')}
               </button>
             ) : (
               <form onSubmit={handleAddOption} className="add-option-form">
@@ -205,15 +190,15 @@ const PollDetails = () => {
                   type="text"
                   value={newOption}
                   onChange={(e) => setNewOption(e.target.value)}
-                  placeholder="Enter new option"
+                  placeholder={t('enterOption')}
                   required
                 />
-                <button type="submit">Add Option</button>
+                <button type="submit">{t('submit')}</button>
                 <button 
                   type="button" 
                   onClick={() => setShowAddOption(false)}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
               </form>
             )}
@@ -222,7 +207,7 @@ const PollDetails = () => {
 
         {!isAuthenticated && (
           <div className="login-prompt">
-            <p>Log in to add new options or track your votes!</p>
+            <p>{t('loginPrompt')}</p>
           </div>
         )}
       </div>

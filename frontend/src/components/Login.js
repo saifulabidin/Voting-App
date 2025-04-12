@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
+import { useLanguage } from '../context/LanguageContext';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,41 +21,41 @@ const Login = () => {
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/');
       } else {
-        setError('Login failed - no token received');
+        setError(t('loginFailed'));
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed - server error');
+      setError(err.response?.data?.message || t('serverError'));
     }
   };
 
   return (
     <div className="auth-container">
       <form onSubmit={handleSubmit} className="auth-form">
-        <h2>Login</h2>
+        <h2>{t('loginTitle')}</h2>
         {error && <div className="error-message">{error}</div>}
         <div className="form-group">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">{t('username')}</label>
           <input
             type="text"
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            placeholder="Enter your username"
+            placeholder={t('enterUsername')}
           />
         </div>
         <div className="form-group">
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">{t('password')}</label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            placeholder="Enter your password"
+            placeholder={t('enterPassword')}
           />
         </div>
-        <button type="submit" className="auth-button">Login</button>
+        <button type="submit" className="auth-button">{t('loginButton')}</button>
       </form>
     </div>
   );

@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import API from '../api';
+import { useLanguage } from '../context/LanguageContext';
 
 const Navigation = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
+  const { t, language, toggleLanguage } = useLanguage();
 
   const handleLogout = async () => {
     try {
@@ -19,19 +21,27 @@ const Navigation = () => {
 
   return (
     <nav className="navigation">
-      {user ? (
-        <>
-          <Link to="/">Home</Link>
-          <Link to="/create">Create Poll</Link>
-          <span>Welcome, {user.username}!</span>
-          <button onClick={handleLogout}>Logout</button>
-        </>
-      ) : (
-        <>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-        </>
-      )}
+      <div className="nav-links">
+        {user ? (
+          <>
+            <Link to="/">{t('home')}</Link>
+            <Link to="/create">{t('createPoll')}</Link>
+            <span>{t('welcome')}, {user.username}!</span>
+            <button onClick={handleLogout}>{t('logout')}</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">{t('login')}</Link>
+            <Link to="/register">{t('register')}</Link>
+          </>
+        )}
+      </div>
+      <button 
+        onClick={toggleLanguage}
+        className="language-button nav-lang-button"
+      >
+        {language === 'en' ? 'ID' : 'EN'}
+      </button>
     </nav>
   );
 };
