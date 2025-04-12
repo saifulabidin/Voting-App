@@ -209,7 +209,7 @@
   align-items: center;
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #654ea3, #da77f2);
+  background: linear-gradient(135deg, #282c34, #282c34);
 }
 
 .auth-form {
@@ -252,7 +252,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #da77f2;
+  border-color: #282c34;
   background-color: white;
 }
 
@@ -263,7 +263,7 @@
 .auth-button {
   width: 100%;
   padding: 12px;
-  background-color: #da77f2;
+  background-color: #282c34;
   color: white;
   border: none;
   border-radius: 8px;
@@ -274,7 +274,7 @@
 }
 
 .auth-button:hover {
-  background-color: #c264d9;
+  background-color: #282c34;
 }
 
 .remember-me {
@@ -347,7 +347,7 @@
 }
 
 .signup-link a {
-  color: #da77f2;
+  color: #282c34;
   text-decoration: none;
   font-weight: 500;
 }

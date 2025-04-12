@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
 import { formatUsername } from '../utils/pollUtils';
+import './Navigation.css';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -21,28 +22,41 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="navigation">
-      <div className="nav-links">
-        <Link to="/">{t('home')}</Link>
-        {user ? (
-          <>
-            <Link to="/create">{t('createPoll')}</Link>
-            <span>{t('welcome')}, {formatUsername(user.username)}!</span>
-            <button onClick={handleLogout}>{t('logout')}</button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">{t('login')}</Link>
-            <Link to="/register">{t('register')}</Link>
-          </>
-        )}
+    <nav className="main-navigation">
+      <div className="nav-container">
+        <div className="nav-brand">
+          <Link to="/" className="brand-link">
+            <span className="brand-text">SabidzPoll</span>
+          </Link>
+        </div>
+
+        <div className="nav-links">
+          <Link to="/create" className="nav-link">{t('createPoll')}</Link>
+          <Link to="#" className="nav-link">{t('schedule')}</Link>
+        </div>
+
+        <div className="nav-auth">
+          {user ? (
+            <>
+              <span className="welcome-text">{t('welcome')}, {formatUsername(user.username)}!</span>
+              <button onClick={handleLogout} className="auth-button logout-button">
+                {t('logout')}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="auth-button login-button">{t('login')}</Link>
+              <Link to="/register" className="auth-button signup-button">{t('register')}</Link>
+            </>
+          )}
+          <button 
+            onClick={toggleLanguage}
+            className="language-button"
+          >
+            {language === 'en' ? 'ID' : 'EN'}
+          </button>
+        </div>
       </div>
-      <button 
-        onClick={toggleLanguage}
-        className="language-button nav-lang-button"
-      >
-        {language === 'en' ? 'ID' : 'EN'}
-      </button>
     </nav>
   );
 };

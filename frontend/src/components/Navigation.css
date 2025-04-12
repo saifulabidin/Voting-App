@@ -1,0 +1,144 @@
+.main-navigation {
+  background-color: #242830;
+  padding: 0.75rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand-link {
+  text-decoration: none;
+}
+
+.brand-text {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auth-button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.login-button {
+  color: #94a3b8;
+  background: none;
+  border: 1px solid #3f4451;
+}
+
+.login-button:hover {
+  color: #10b981;
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.signup-button {
+  color: #ffffff;
+  background-color: #10b981;
+  border: none;
+}
+
+.signup-button:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.logout-button {
+  color: #94a3b8;
+  background: none;
+  border: 1px solid #3f4451;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.welcome-text {
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.language-button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #94a3b8;
+  background: none;
+  border: 1px solid #3f4451;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.language-button:hover {
+  color: #10b981;
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-auth {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

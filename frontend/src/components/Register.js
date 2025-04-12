@@ -1,128 +1,105 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
+import './Auth.css';
 
 const Register = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [credentials, setCredentials] = useState({
+    username: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { t } = useLanguage();
 
-  useEffect(() => {
-    // Load reCAPTCHA script
-    const script = document.createElement('script');
-    script.src = 'https://www.google.com/recaptcha/api.js';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  const validatePassword = (password) => {
-    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return strongPassword.test(password);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      setError(t('passwordsMustMatch'));
-      return;
-    }
+    setError('');
 
-    if (!validatePassword(password)) {
-      setError(t('passwordRequirements'));
+    if (credentials.password !== credentials.confirmPassword) {
+      setError(t('passwordMismatch'));
       return;
     }
 
     try {
-      const recaptchaValue = window.grecaptcha?.getResponse();
-      if (!recaptchaValue) {
-        setError(t('recaptchaRequired'));
-        return;
-      }
-
-      await API.post('/auth/register', { 
-        username, 
-        password,
-        recaptchaToken: recaptchaValue
+      await API.post('/auth/register', {
+        username: credentials.username,
+        password: credentials.password
       });
-      navigate('/login');
+      navigate('/login', { state: { message: t('registrationSuccess') } });
     } catch (err) {
-      setError(err.response?.data?.message || t('serverError'));
-      if (window.grecaptcha) {
-        window.grecaptcha.reset();
-      }
+      setError(err.response?.data?.message || t('registrationError'));
     }
   };
 
-  const handleGoogleRegister = () => {
-    window.location.href = `https://voting-app-production-3a8c.up.railway.app/auth/google`;
+  const handleGoogleLogin = () => {
+    window.location.href = `${process.env.REACT_APP_BACKEND_URL}/auth/google`;
   };
 
   return (
     <div className="auth-container">
-      <form onSubmit={handleRegister} className="auth-form">
-        <h2>{t('registerTitle')}</h2>
+      <div className="auth-form">
+        <h2>{t('register')}</h2>
         {error && <div className="error-message">{error}</div>}
-        
-        <div className="form-group">
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            placeholder={t('enterEmail')}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <input
+              type="text"
+              name="username"
+              value={credentials.username}
+              onChange={handleChange}
+              placeholder={t('username')}
+              required
+              minLength={3}
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="password"
+              name="password"
+              value={credentials.password}
+              onChange={handleChange}
+              placeholder={t('password')}
+              required
+              minLength={6}
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="password"
+              name="confirmPassword"
+              value={credentials.confirmPassword}
+              onChange={handleChange}
+              placeholder={t('confirmPassword')}
+              required
+            />
+          </div>
+          <button type="submit" className="auth-button">
+            {t('register')}
+          </button>
+        </form>
 
-        <div className="form-group">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder={t('choosePassword')}
-          />
-        </div>
+        <div className="or-divider">{t('or')}</div>
 
-        <div className="form-group">
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            placeholder={t('confirmPassword')}
-          />
-        </div>
-
-        <button type="submit" className="auth-button">{t('registerButton')}</button>
-
-        <div className="or-divider">{t('orRegisterWith')}</div>
-
-        <button type="button" className="google-button" onClick={handleGoogleRegister}>
-          <img src={`${process.env.PUBLIC_URL}/google-icon.svg`} alt="Google" />
+        <button onClick={handleGoogleLogin} className="google-button">
+          <img src="/google-icon.svg" alt="Google" />
           {t('continueWithGoogle')}
         </button>
 
-        <div className="recaptcha-container">
-          <div 
-            className="g-recaptcha" 
-            data-sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
-          ></div>
-        </div>
-
         <div className="signup-link">
-          {t('alreadyHaveAccount')} <Link to="/login">{t('loginNow')}</Link>
+          {t('haveAccount')} <Link to="/login">{t('loginHere')}</Link>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
