@@ -13,7 +13,7 @@ const Navigation = () => {
       await API.get('/auth/logout');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      navigate('/login');
+      navigate('/');
     } catch (err) {
       console.error('Logout failed:', err);
     }
@@ -22,9 +22,9 @@ const Navigation = () => {
   return (
     <nav className="navigation">
       <div className="nav-links">
+        <Link to="/">{t('home')}</Link>
         {user ? (
           <>
-            <Link to="/">{t('home')}</Link>
             <Link to="/create">{t('createPoll')}</Link>
             <span>{t('welcome')}, {user.username}!</span>
             <button onClick={handleLogout}>{t('logout')}</button>

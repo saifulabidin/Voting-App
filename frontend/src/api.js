@@ -28,9 +28,16 @@ API.interceptors.response.use(
       headers: error.config?.headers
     });
 
-    // Handle authentication errors
-    if (error.response?.status === 401) {
+    // Only redirect to login for authenticated routes when 401
+    const authenticatedRoutes = ['/create', '/polls/*/vote', '/polls/*/options'];
+    const isAuthenticatedRoute = authenticatedRoutes.some(route => {
+      const pattern = new RegExp(route.replace('*', '[^/]+'));
+      return pattern.test(error.config?.url);
+    });
+
+    if (error.response?.status === 401 && isAuthenticatedRoute) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
 
@@ -38,7 +45,7 @@ API.interceptors.response.use(
   }
 );
 
-// Analytics endpoints with authentication
+// Analytics endpoints
 API.getAnalytics = (pollId) => API.get(`/polls/${pollId}/analytics`);
 API.trackView = (pollId) => API.post(`/polls/${pollId}/view`);
 API.trackShare = (pollId) => API.post(`/polls/${pollId}/share`);

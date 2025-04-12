@@ -17,16 +17,8 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <PollList />
-            </ProtectedRoute>
-          } />
-          <Route path="/polls/:id" element={
-            <ProtectedRoute>
-              <PollDetails />
-            </ProtectedRoute>
-          } />
+          <Route path="/" element={<PollList />} />
+          <Route path="/polls/:id" element={<PollDetails />} />
           <Route path="/create" element={
             <ProtectedRoute>
               <CreatePoll />

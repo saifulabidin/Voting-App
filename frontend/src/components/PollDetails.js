@@ -55,11 +55,17 @@ const PollDetails = () => {
     try {
       setError(null);
       if (!isAuthenticated) {
+        // Save intended action for after login
         sessionStorage.setItem('pendingVote', JSON.stringify({
           pollId: id,
           optionId: optionId
         }));
-        navigate('/login');
+        // Show login prompt and redirect
+        setVoteStatus({
+          message: t('loginPrompt'),
+          type: 'info'
+        });
+        setTimeout(() => navigate('/login'), 2000);
         return;
       }
 
@@ -199,19 +205,27 @@ const PollDetails = () => {
         <div className="options-list">
           {poll.options.map((option) => (
             <div key={option._id} className="poll-option">
-              <span>{option.option} - {option.votes} votes</span>
-              {isAuthenticated && poll.voters.includes(currentUserId) ? (
-                <button 
-                  onClick={() => handleRemoveVote(option._id)}
-                  className="vote-button remove"
-                >
-                  {t('removeVote')}
-                </button>
+              <span>{option.option} - {option.votes} {t('votes')}</span>
+              {isAuthenticated ? (
+                poll.voters.includes(currentUserId) ? (
+                  <button 
+                    onClick={() => handleRemoveVote(option._id)}
+                    className="vote-button remove"
+                  >
+                    {t('removeVote')}
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => handleVote(option._id)}
+                    className="vote-button"
+                  >
+                    {t('voteButton')}
+                  </button>
+                )
               ) : (
                 <button 
                   onClick={() => handleVote(option._id)}
-                  disabled={isAuthenticated && poll.voters.includes(currentUserId)}
-                  className="vote-button"
+                  className="vote-button login-required"
                 >
                   {t('voteButton')}
                 </button>
@@ -224,39 +238,40 @@ const PollDetails = () => {
           <PollChart poll={poll} />
         </div>
 
-        <PollAnalytics />
-
-        {isAuthenticated && !poll.voters.includes(currentUserId) && (
-          <div className="add-option-section">
-            {!showAddOption ? (
-              <button 
-                onClick={() => setShowAddOption(true)}
-                className="add-option-button"
-              >
-                {t('addOption')}
-              </button>
-            ) : (
-              <form onSubmit={handleAddOption} className="add-option-form">
-                <input
-                  type="text"
-                  value={newOption}
-                  onChange={(e) => setNewOption(e.target.value)}
-                  placeholder={t('enterOption')}
-                  required
-                />
-                <button type="submit">{t('submit')}</button>
-                <button 
-                  type="button" 
-                  onClick={() => setShowAddOption(false)}
-                >
-                  {t('cancel')}
-                </button>
-              </form>
+        {isAuthenticated ? (
+          <>
+            <PollAnalytics />
+            {!poll.voters.includes(currentUserId) && (
+              <div className="add-option-section">
+                {!showAddOption ? (
+                  <button 
+                    onClick={() => setShowAddOption(true)}
+                    className="add-option-button"
+                  >
+                    {t('addOption')}
+                  </button>
+                ) : (
+                  <form onSubmit={handleAddOption} className="add-option-form">
+                    <input
+                      type="text"
+                      value={newOption}
+                      onChange={(e) => setNewOption(e.target.value)}
+                      placeholder={t('enterOption')}
+                      required
+                    />
+                    <button type="submit">{t('submit')}</button>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAddOption(false)}
+                    >
+                      {t('cancel')}
+                    </button>
+                  </form>
+                )}
+              </div>
             )}
-          </div>
-        )}
-
-        {!isAuthenticated && (
+          </>
+        ) : (
           <div className="login-prompt">
             <p>{t('loginPrompt')}</p>
           </div>
