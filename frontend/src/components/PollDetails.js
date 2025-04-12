@@ -19,7 +19,7 @@ const PollDetails = () => {
   });
   const [newOption, setNewOption] = useState('');
   const [showAddOption, setShowAddOption] = useState(false);
-  const { t, language, toggleLanguage } = useLanguage();
+  const { t } = useLanguage();
 
   const isAuthenticated = !!localStorage.getItem('token');
   const currentUserId = localStorage.getItem('userId');
@@ -160,14 +160,6 @@ const PollDetails = () => {
   return (
     <div className="poll-details">
       <div className="poll-header">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-          <button 
-            onClick={toggleLanguage}
-            className="language-button"
-          >
-            {language === 'en' ? 'ID' : 'EN'}
-          </button>
-        </div>
         <h1>{poll.title}</h1>
         <p>{t('createdBy')} {formatUsername(poll.createdBy?.username) || t('unknown')}</p>
         

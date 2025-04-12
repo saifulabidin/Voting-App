@@ -1,0 +1,144 @@
+.poll-details {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.poll-header {
+  margin-bottom: 2rem;
+}
+
+.poll-header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.poll-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.poll-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.poll-content {
+  display: grid;
+  gap: 2rem;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.poll-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--background-light);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.poll-option span {
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.vote-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: var(--primary-color);
+  color: var(--text-primary);
+}
+
+.vote-button:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.vote-button.remove {
+  background-color: var(--error-color);
+}
+
+.vote-button.remove:hover {
+  background-color: #dc2626;
+}
+
+.add-option-section {
+  margin-top: 2rem;
+}
+
+.add-option-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: transparent;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-option-button:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.add-option-form {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.add-option-form input {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: var(--input-background);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.add-option-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+@media (max-width: 640px) {
+  .poll-details {
+    padding: 1rem;
+  }
+
+  .poll-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .poll-actions {
+    flex-direction: column;
+  }
+
+  .poll-option {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .vote-button {
+    width: 100%;
+  }
+}
