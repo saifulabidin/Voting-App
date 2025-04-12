@@ -460,7 +460,34 @@ const trackEvent = async (req, res, eventType) => {
   }
 };
 
-router.post('/:pollId/view', async (req, res) => trackEvent(req, res, 'view'));
+// Modified view tracking endpoint
+router.post('/:pollId/view', async (req, res) => {
+  try {
+    const { pollId } = req.params;
+    
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(pollId)) {
+      return res.status(400).json({ message: 'Invalid poll ID format' });
+    }
+
+    // Check if poll exists
+    const poll = await Poll.findById(pollId);
+    if (!poll) {
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+
+    // Track view event
+    await Analytics.trackEvent(pollId, 'view');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('View tracking error:', err);
+    res.status(500).json({ 
+      message: 'Failed to track view',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
 router.post('/:pollId/share', async (req, res) => trackEvent(req, res, 'share'));
 
 module.exports = router;

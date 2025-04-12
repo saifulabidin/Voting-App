@@ -28,7 +28,17 @@ ChartJS.register(
 const PollAnalytics = () => {
   const { id } = useParams();
   const { t } = useLanguage();
-  const [analytics, setAnalytics] = useState(null);
+  const [analytics, setAnalytics] = useState({
+    totalViews: 0,
+    totalVotes: 0,
+    totalShares: 0,
+    totalOptionsAdded: 0,
+    viewsOverTime: [],
+    votesOverTime: [],
+    sharesOverTime: [],
+    optionsAddedOverTime: [],
+    timePoints: []
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -36,6 +46,7 @@ const PollAnalytics = () => {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
+        setError(null);
         const { data } = await API.getAnalytics(id);
         setAnalytics(data);
       } catch (err) {
@@ -46,26 +57,27 @@ const PollAnalytics = () => {
       }
     };
 
-    fetchAnalytics();
+    if (id) {
+      fetchAnalytics();
+    }
   }, [id]);
 
   if (loading) return <div className="loading">{t('loading')}</div>;
   if (error) return <div className="error-message">{error}</div>;
-  if (!analytics) return null;
 
-  const formatTimePoints = (timePoints) => {
+  const formatTimePoints = (timePoints = []) => {
     return timePoints.map(time => {
       const date = new Date(time);
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
     });
   };
 
-  const countEventsUpToTimePoint = (events, timePoint) => {
+  const countEventsUpToTimePoint = (events = [], timePoint) => {
     return events.filter(event => new Date(event) <= new Date(timePoint)).length;
   };
 
   const processTimeSeriesData = () => {
-    const { timePoints, viewsOverTime, votesOverTime, sharesOverTime, optionsAddedOverTime } = analytics;
+    const { timePoints = [], viewsOverTime = [], votesOverTime = [], sharesOverTime = [], optionsAddedOverTime = [] } = analytics;
     
     return {
       labels: formatTimePoints(timePoints),
@@ -174,19 +186,19 @@ const PollAnalytics = () => {
       <div className="analytics-stats">
         <div className="stat-item">
           <span className="stat-label">{t('totalViews')}</span>
-          <span className="stat-value">{analytics.totalViews}</span>
+          <span className="stat-value">{analytics.totalViews || 0}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">{t('totalVotes')}</span>
-          <span className="stat-value">{analytics.totalVotes}</span>
+          <span className="stat-value">{analytics.totalVotes || 0}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">{t('totalShares')}</span>
-          <span className="stat-value">{analytics.totalShares}</span>
+          <span className="stat-value">{analytics.totalShares || 0}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">{t('totalOptionsAdded')}</span>
-          <span className="stat-value">{analytics.totalOptionsAdded}</span>
+          <span className="stat-value">{analytics.totalOptionsAdded || 0}</span>
         </div>
       </div>
 

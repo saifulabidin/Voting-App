@@ -48,10 +48,9 @@ const PollDetails = () => {
 
   useEffect(() => {
     if (poll?._id) {
-      // Track view when poll is loaded and changes
       API.trackView(poll._id).catch(console.error);
     }
-  }, [poll?._id]); // Only depend on poll._id instead of entire poll object
+  }, [poll?._id]);
 
   const handleVote = async (optionId) => {
     try {
@@ -121,9 +120,14 @@ const PollDetails = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm(t('deleteConfirm'))) {
-      await API.delete(`/polls/${id}`);
-      navigate('/polls');
+    try {
+      if (window.confirm(t('deleteConfirm'))) {
+        await API.delete(`/polls/${id}`);
+        navigate('/polls');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      setError(err.response?.data?.message || 'Error deleting poll');
     }
   };
 
@@ -160,15 +164,15 @@ const PollDetails = () => {
   return (
     <div className="poll-details">
       <div className="poll-header">
-        <h1>{poll.title}</h1>
-        <p>{t('createdBy')} {formatUsername(poll.createdBy?.username) || t('unknown')}</p>
+        <h1>{poll?.title}</h1>
+        <p>{t('createdBy')} {formatUsername(poll?.createdBy?.username) || t('unknown')}</p>
         
         <div className="poll-actions">
           <button onClick={handleShare} className="share-button">
             {t('shareButton')}
           </button>
           
-          {isAuthenticated && poll.createdBy?._id === currentUserId && (
+          {isAuthenticated && poll?.createdBy?._id && currentUserId && poll.createdBy._id === currentUserId && (
             <button 
               onClick={handleDelete}
               className="delete-button"

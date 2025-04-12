@@ -136,6 +136,23 @@
   transform: translateY(-1px);
 }
 
+.delete-button {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--error-color);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 640px) {
   .poll-details {
     padding: 1rem;
