@@ -1,0 +1,131 @@
+.create-poll-container {
+  min-height: calc(100vh - 60px);
+  padding: 2rem;
+  background-color: #1a1d21;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.create-poll-form {
+  width: 100%;
+  max-width: 600px;
+  background: #242830;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-subtitle {
+  color: #94a3b8;
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 1.1rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #2f333d;
+  border: 1px solid #3f4451;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.add-option-button {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: #2f333d;
+  border: 2px dashed #3f4451;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.add-option-button:hover {
+  background-color: #3f4451;
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
+.add-option-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 1rem;
+  background-color: #6366f1;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.submit-button:hover {
+  background-color: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  background-color: #4b5563;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .create-poll-container {
+    padding: 1rem;
+  }
+
+  .create-poll-form {
+    padding: 1.5rem;
+  }
+
+  .form-title {
+    font-size: 2rem;
+  }
+}

@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
+import './CreatePoll.css';
+
+const PlusIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+  </svg>
+);
 
 const CreatePoll = () => {
   const [title, setTitle] = useState('');
@@ -75,31 +82,46 @@ const CreatePoll = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="create-poll-form">
-      <h1>{t('createPollTitle')}</h1>
-      <input
-        type="text"
-        placeholder={t('pollTitle')}
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      {options.map((option, index) => (
+    <div className="create-poll-container">
+      <form onSubmit={handleSubmit} className="create-poll-form">
+        <h1 className="form-title">{t('createPollTitle')}</h1>
+        <p className="form-subtitle">Complete the below fields to create your poll.</p>
+        
         <input
-          key={index}
           type="text"
-          placeholder={`${t('option')} ${index + 1}`}
-          value={option}
-          onChange={(e) => handleOptionChange(index, e.target.value)}
+          placeholder={t('pollTitle')}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="form-input"
         />
-      ))}
-      <button type="button" onClick={() => setOptions([...options, ''])}>
-        {t('addMoreOption')}
-      </button>
-      <button type="submit" disabled={loading}>
-        {t('create')}
-      </button>
-      {error && <p className="error-message">{error}</p>}
-    </form>
+        
+        {options.map((option, index) => (
+          <input
+            key={index}
+            type="text"
+            placeholder={`${t('option')} ${index + 1}`}
+            value={option}
+            onChange={(e) => handleOptionChange(index, e.target.value)}
+            className="form-input"
+          />
+        ))}
+        
+        <button 
+          type="button" 
+          onClick={() => setOptions([...options, ''])} 
+          className="add-option-button"
+        >
+          <PlusIcon />
+          {t('addMoreOption')}
+        </button>
+        
+        <button type="submit" disabled={loading} className="submit-button">
+          {loading ? '...' : t('create')}
+        </button>
+        
+        {error && <p className="error-message">{error}</p>}
+      </form>
+    </div>
   );
 };
 
