@@ -9,12 +9,20 @@ const errorHandler = (err, req, res, next) => {
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 
+  // Set CORS headers for all error responses
+  const allowedOrigin = process.env.FRONTEND_URL || 'https://voting-app-fullstack.netlify.app';
+  res.header('Access-Control-Allow-Origin', allowedOrigin);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
   // Enhanced CORS error handling
   if (err.name === 'CORSError' || (err.message && err.message.includes('CORS'))) {
-    // Set CORS headers even in error responses
-    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'https://voting-app-fullstack.netlify.app');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
     return res.status(403).json({
       status: 'error',
       code: 'CORS_ERROR',
@@ -23,7 +31,7 @@ const errorHandler = (err, req, res, next) => {
         origin: req.headers.origin,
         method: req.method,
         path: req.path,
-        allowedOrigin: process.env.FRONTEND_URL || 'https://voting-app-fullstack.netlify.app'
+        allowedOrigin
       } : undefined
     });
   }
@@ -59,12 +67,22 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Handle network errors
-  if (err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET') {
+  // Enhanced network error handling
+  if (err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
     return res.status(503).json({
       status: 'error',
       code: 'NETWORK_ERROR',
-      message: 'Service temporarily unavailable'
+      message: 'Service temporarily unavailable. Please try again later.',
+      retryAfter: 30
+    });
+  }
+
+  // Handle proxy errors
+  if (err.code === 'EPROTO' || err.code === 'ECONNABORTED') {
+    return res.status(502).json({
+      status: 'error',
+      code: 'PROXY_ERROR',
+      message: 'Gateway error. Please try again later.'
     });
   }
 
