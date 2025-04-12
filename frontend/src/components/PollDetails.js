@@ -79,6 +79,30 @@ const PollDetails = () => {
     }
   };
 
+  const handleRemoveVote = async (optionId) => {
+    try {
+      setError(null);
+      const { data } = await API.delete(`/polls/${id}/vote`, { 
+        data: { optionId } 
+      });
+      setPoll(data);
+      setVoteStatus({
+        message: t('voteRemoved'),
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Remove vote error:', err);
+      if (err.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setVoteStatus({
+          message: t('voteRemoveError'),
+          type: 'error'
+        });
+      }
+    }
+  };
+
   const handleAddOption = async (e) => {
     e.preventDefault();
     if (!newOption.trim()) return;
@@ -160,13 +184,22 @@ const PollDetails = () => {
           {poll.options.map((option) => (
             <div key={option._id} className="poll-option">
               <span>{option.option} - {option.votes} votes</span>
-              <button 
-                onClick={() => handleVote(option._id)}
-                disabled={isAuthenticated && poll.voters.includes(currentUserId)}
-                className="vote-button"
-              >
-                {isAuthenticated && poll.voters.includes(currentUserId) ? t('voted') : t('voteButton')}
-              </button>
+              {isAuthenticated && poll.voters.includes(currentUserId) ? (
+                <button 
+                  onClick={() => handleRemoveVote(option._id)}
+                  className="vote-button remove"
+                >
+                  {t('removeVote')}
+                </button>
+              ) : (
+                <button 
+                  onClick={() => handleVote(option._id)}
+                  disabled={isAuthenticated && poll.voters.includes(currentUserId)}
+                  className="vote-button"
+                >
+                  {t('voteButton')}
+                </button>
+              )}
             </div>
           ))}
         </div>

@@ -264,4 +264,61 @@ router.post('/:pollId/vote', optionalAuth, async (req, res) => {
   }
 });
 
+// Add remove vote endpoint
+router.delete('/:pollId/vote', protect, async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { pollId } = req.params;
+    const { optionId } = req.body;
+
+    const poll = await Poll.findById(pollId).session(session);
+    
+    if (!poll) {
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+
+    // Check if user has voted
+    if (!poll.voters.includes(req.user._id)) {
+      return res.status(400).json({ 
+        message: 'You have not voted on this poll',
+        code: 'NO_VOTE'
+      });
+    }
+
+    const option = poll.options.id(optionId);
+    if (!option) {
+      return res.status(400).json({ message: 'Invalid option selected' });
+    }
+
+    // Decrement vote count
+    option.votes = Math.max(0, option.votes - 1);
+    
+    // Remove user from voters list
+    poll.voters = poll.voters.filter(
+      voterId => voterId.toString() !== req.user._id.toString()
+    );
+        
+    await poll.save({ session });
+    await session.commitTransaction();
+    
+    // Return updated poll with user info
+    const updatedPoll = await Poll.findById(pollId)
+      .populate('createdBy', 'username')
+      .populate('voters', 'username');
+      
+    res.json(updatedPoll);
+  } catch (err) {
+    await session.abortTransaction();
+    console.error('Remove vote error:', err);
+    res.status(400).json({ 
+      message: 'Failed to remove vote. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  } finally {
+    session.endSession();
+  }
+});
+
 module.exports = router;

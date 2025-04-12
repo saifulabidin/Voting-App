@@ -150,6 +150,14 @@ h2 {
   cursor: not-allowed;
 }
 
+.vote-button.remove {
+  background-color: #dc3545;
+}
+
+.vote-button.remove:hover {
+  background-color: #bd2130;
+}
+
 .status-message {
   padding: 10px;
   border-radius: 4px;

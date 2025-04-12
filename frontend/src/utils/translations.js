@@ -58,7 +58,10 @@ export const translations = {
     serverError: "Server error",
     usernameRequired: "Username is required",
     usernameExists: "Username already exists",
-    registrationSuccess: "Registration successful"
+    registrationSuccess: "Registration successful",
+    removeVote: "Remove Vote",
+    voteRemoved: "Vote successfully removed",
+    voteRemoveError: "Failed to remove vote. Please try again."
   },
   id: {
     loading: "Memuat detail polling...",
@@ -119,6 +122,9 @@ export const translations = {
     serverError: "Kesalahan server",
     usernameRequired: "Nama pengguna harus diisi",
     usernameExists: "Nama pengguna sudah ada",
-    registrationSuccess: "Pendaftaran berhasil"
+    registrationSuccess: "Pendaftaran berhasil",
+    removeVote: "Hapus Vote",
+    voteRemoved: "Vote berhasil dihapus",
+    voteRemoveError: "Gagal menghapus vote. Silakan coba lagi."
   }
 };
