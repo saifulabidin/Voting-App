@@ -5,6 +5,7 @@ import PollChart from './PollChart';
 import PollAnalytics from './PollAnalytics';
 import { useLanguage } from '../context/LanguageContext';
 import { formatUsername } from '../utils/pollUtils';
+import '../styles/poll-details.css';
 
 const PollDetails = () => {
   const { id } = useParams();

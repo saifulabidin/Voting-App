@@ -1,18 +1,88 @@
 .delete-button {
-  background-color: #ff4444;
-  color: white;
-  padding: 8px 16px;
+  background-color: var(--error-color);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .delete-button:hover {
-  background-color: #ff0000;
+  background-color: #dc2626;
+  transform: translateY(-1px);
 }
 
 .delete-button:disabled {
-  background-color: #ffaaaa;
+  background-color: var(--border-color);
   cursor: not-allowed;
+  transform: none;
+}
+
+.share-button {
+  background-color: var(--success-color);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.share-button:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.add-option-button {
+  background-color: var(--input-background);
+  color: var(--text-secondary);
+  padding: 0.75rem 1rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.add-option-button:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.1);
+}
+
+.add-option-button svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.pagination-button {
+  padding: 0.75rem 1rem;
+  background-color: var(--primary-color);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.pagination-button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+  transform: none;
 }

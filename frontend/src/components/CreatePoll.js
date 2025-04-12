@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
-import './CreatePoll.css';
+import '../styles/create-poll.css';
 
 const PlusIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">

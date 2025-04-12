@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import ReCAPTCHA from "react-google-recaptcha";
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
-import './Auth.css';
+import '../styles/auth.css';
 
 const Register = () => {
   const [credentials, setCredentials] = useState({
@@ -11,6 +12,7 @@ const Register = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const recaptchaRef = useRef(null);
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -32,13 +34,21 @@ const Register = () => {
     }
 
     try {
+      const recaptchaToken = await recaptchaRef.current.executeAsync();
+      if (!recaptchaToken) {
+        setError(t('pleaseVerifyRecaptcha'));
+        return;
+      }
+
       await API.post('/auth/register', {
         username: credentials.username,
-        password: credentials.password
+        password: credentials.password,
+        recaptchaToken
       });
       navigate('/login', { state: { message: t('registrationSuccess') } });
     } catch (err) {
       setError(err.response?.data?.message || t('registrationError'));
+      recaptchaRef.current.reset();
     }
   };
 
@@ -82,6 +92,13 @@ const Register = () => {
               onChange={handleChange}
               placeholder={t('confirmPassword')}
               required
+            />
+          </div>
+          <div className="recaptcha-container">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              size="invisible"
+              sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
             />
           </div>
           <button type="submit" className="auth-button">

@@ -5,8 +5,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  background-color: #1a1d21;
-  color: #ffffff;
+  background-color: var(--background-dark);
+  color: var(--text-primary);
 }
 
 * {
@@ -80,339 +80,27 @@ code {
     monospace;
 }
 
-.auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
-  background: linear-gradient(135deg, #654ea3, #da77f2);
-}
-
-.auth-form {
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.auth-form h2 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #333;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #e1e1e1;
-  border-radius: 8px;
-  font-size: 14px;
-  background-color: #f8f9fa;
-  transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #da77f2;
-  background-color: white;
-}
-
-.form-group input::placeholder {
-  color: #adb5bd;
-}
-
-.error-message {
-  color: #dc3545;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background-color: #ffd7d7;
-  border-radius: 4px;
-}
-
-.auth-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #da77f2;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.auth-button:hover {
-  background-color: #c264d9;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-  color: #666;
-  font-size: 14px;
-}
-
-.remember-me input[type="checkbox"] {
-  margin-right: 8px;
-}
-
-.or-divider {
-  text-align: center;
-  margin: 20px 0;
-  position: relative;
-  color: #666;
-}
-
-.or-divider::before,
-.or-divider::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 45%;
-  height: 1px;
-  background-color: #e1e1e1;
-}
-
-.or-divider::before {
-  left: 0;
-}
-
-.or-divider::after {
-  right: 0;
-}
-
-.google-button {
-  width: 100%;
-  padding: 12px;
-  background-color: white;
-  border: 1px solid #e1e1e1;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  color: #333;
-  font-size: 14px;
-}
-
-.google-button:hover {
-  background-color: #f8f9fa;
-}
-
-.signup-link {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
-  color: #666;
-}
-
-.signup-link a {
-  color: #da77f2;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.signup-link a:hover {
-  text-decoration: underline;
-}
-
-h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #333;
-}
-
-.poll-details {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.poll-header {
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.poll-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 15px;
-}
-
-.share-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.share-button:hover {
-  background-color: #45a049;
-}
-
-.poll-content {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-.options-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.poll-option {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-}
-
-.vote-button {
-  background-color: #007bff;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.vote-button:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-.vote-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.vote-button.remove {
-  background-color: #dc3545;
-}
-
-.vote-button.remove:hover {
-  background-color: #bd2130;
-}
-
+/* Status messages */
 .status-message {
-  padding: 10px;
-  border-radius: 4px;
-  margin: 10px 0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
   text-align: center;
 }
 
 .status-message.success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
 }
 
 .status-message.error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
 }
 
-.add-option-section {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.add-option-button {
-  background-color: #6c757d;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.add-option-button:hover {
-  background-color: #5a6268;
-}
-
-.add-option-form {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  justify-content: center;
-}
-
-.add-option-form input {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 200px;
-}
-
-.add-option-form button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.add-option-form button[type="submit"] {
-  background-color: #28a745;
-  color: white;
-}
-
-.add-option-form button[type="submit"]:hover {
-  background-color: #218838;
-}
-
-.add-option-form button[type="button"] {
-  background-color: #6c757d;
-  color: white;
-}
-
-.add-option-form button[type="button"]:hover {
-  background-color: #5a6268;
-}
-
-.login-prompt {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.login-prompt p {
-  margin: 0;
-  color: #6c757d;
-}
-
+/* Loading spinner */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -424,11 +112,17 @@ h2 {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
+}
+
+.loading {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
 }
 
 @keyframes spin {
@@ -436,219 +130,15 @@ h2 {
   100% { transform: rotate(360deg); }
 }
 
-.language-button {
-  background-color: #333;
-  color: white;
-  border: 1px solid white;
-  border-radius: 4px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.language-button:hover {
-  background-color: #555;
-}
-
-.language-button:active {
-  transform: scale(0.95);
-}
-
-.create-poll-form {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.create-poll-form input {
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.create-poll-form button {
-  padding: 0.75rem 1.5rem;
-  margin: 0.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
-}
-
-.create-poll-form button[type="submit"] {
-  background-color: #007bff;
-  color: white;
-}
-
-.create-poll-form button[type="submit"]:hover {
-  background-color: #0056b3;
-}
-
-.create-poll-form button[type="button"] {
-  background-color: #6c757d;
-  color: white;
-}
-
-.create-poll-form button[type="button"]:hover {
-  background-color: #5a6268;
-}
-
-.create-poll-form button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.create-poll-form h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 1.5rem;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 2rem;
-  gap: 1rem;
-}
-
-.pagination-button {
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.pagination-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.pagination-button:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-.page-info {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.search-form {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.search-input {
-  flex: 1;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.search-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.search-button:hover {
-  background-color: #0056b3;
-}
-
-.no-results {
-  text-align: center;
-  color: #666;
-  margin: 2rem 0;
-  font-style: italic;
-}
-
-.analytics-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 1rem;
-}
-
-.analytics-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin: 2rem 0;
-}
-
-.stat-item {
-  background-color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.stat-label {
-  display: block;
-  color: #6c757d;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.stat-value {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #007bff;
-}
-
-.analytics-chart {
-  margin-top: 2rem;
-  padding: 1rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
+/* Media queries */
 @media (max-width: 600px) {
-  .poll-content {
-    gap: 20px;
-  }
-
-  .add-option-form {
-    flex-direction: column;
-  }
-
-  .add-option-form input {
-    width: 100%;
-  }
-
-  .create-poll-form {
-    margin: 1rem;
+  .loading-container {
     padding: 1rem;
   }
-
-  .analytics-stats {
-    grid-template-columns: 1fr;
-  }
   
-  .analytics-container {
-    margin: 1rem;
-    padding: 0.5rem;
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
   }
 }

@@ -1,5 +1,5 @@
 .main-navigation {
-  background-color: #242830;
+  background-color: var(--background-light);
   padding: 0.75rem 1.5rem;
   position: sticky;
   top: 0;
@@ -25,7 +25,7 @@
 }
 
 .brand-text {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.5px;
@@ -38,7 +38,7 @@
 }
 
 .nav-link {
-  color: #94a3b8;
+  color: var(--text-secondary);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
@@ -48,7 +48,7 @@
 }
 
 .nav-link:hover {
-  color: #10b981;
+  color: var(--success-color);
   background-color: rgba(16, 185, 129, 0.1);
 }
 
@@ -68,20 +68,20 @@
 }
 
 .login-button {
-  color: #94a3b8;
+  color: var(--text-secondary);
   background: none;
-  border: 1px solid #3f4451;
+  border: 1px solid var(--border-color);
 }
 
 .login-button:hover {
-  color: #10b981;
-  border-color: #10b981;
+  color: var(--success-color);
+  border-color: var(--success-color);
   background-color: rgba(16, 185, 129, 0.1);
 }
 
 .signup-button {
-  color: #ffffff;
-  background-color: #10b981;
+  color: var(--text-primary);
+  background-color: var(--success-color);
   border: none;
 }
 
@@ -91,20 +91,20 @@
 }
 
 .logout-button {
-  color: #94a3b8;
+  color: var(--text-secondary);
   background: none;
-  border: 1px solid #3f4451;
+  border: 1px solid var(--border-color);
   cursor: pointer;
 }
 
 .logout-button:hover {
-  color: #ef4444;
-  border-color: #ef4444;
+  color: var(--error-color);
+  border-color: var(--error-color);
   background-color: rgba(239, 68, 68, 0.1);
 }
 
 .welcome-text {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
@@ -113,16 +113,16 @@
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-secondary);
   background: none;
-  border: 1px solid #3f4451;
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .language-button:hover {
-  color: #10b981;
-  border-color: #10b981;
+  color: var(--success-color);
+  border-color: var(--success-color);
   background-color: rgba(16, 185, 129, 0.1);
 }
 

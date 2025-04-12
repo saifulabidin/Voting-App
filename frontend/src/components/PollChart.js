@@ -35,7 +35,7 @@ const PollChart = ({ poll }) => {
           '#FF99CC',
           '#99CCFF'
         ],
-        borderColor: '#fff',
+        borderColor: '#242830',
         borderWidth: 2
       }
     ]
@@ -46,7 +46,11 @@ const PollChart = ({ poll }) => {
       legend: {
         position: 'bottom',
         labels: {
-          padding: 20
+          color: '#94a3b8',
+          padding: 20,
+          font: {
+            size: 12
+          }
         }
       },
       tooltip: {
@@ -57,7 +61,12 @@ const PollChart = ({ poll }) => {
             const percentage = ((value / total) * 100).toFixed(1);
             return `${context.label}: ${value} votes (${percentage}%)`;
           }
-        }
+        },
+        backgroundColor: '#242830',
+        titleColor: '#ffffff',
+        bodyColor: '#94a3b8',
+        borderColor: '#3f4451',
+        borderWidth: 1
       }
     },
     responsive: true,
@@ -65,7 +74,7 @@ const PollChart = ({ poll }) => {
   };
 
   return (
-    <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
+    <div className="poll-chart-container">
       <Pie data={data} options={options} />
     </div>
   );

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
 import { formatUsername } from '../utils/pollUtils';
-import './Navigation.css';
+import '../styles/navigation.css';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -32,7 +32,6 @@ const Navigation = () => {
 
         <div className="nav-links">
           <Link to="/create" className="nav-link">{t('createPoll')}</Link>
-          <Link to="#" className="nav-link">{t('schedule')}</Link>
         </div>
 
         <div className="nav-auth">

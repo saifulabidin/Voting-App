@@ -1,7 +1,7 @@
 .create-poll-container {
   min-height: calc(100vh - 60px);
   padding: 2rem;
-  background-color: #1a1d21;
+  background-color: var(--background-dark);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -10,14 +10,15 @@
 .create-poll-form {
   width: 100%;
   max-width: 600px;
-  background: #242830;
+  background: var(--background-light);
   padding: 2.5rem;
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
 }
 
 .form-title {
-  color: #f8f8f8;
+  color: var(--text-primary);
   font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
@@ -25,7 +26,7 @@
 }
 
 .form-subtitle {
-  color: #94a3b8;
+  color: var(--text-secondary);
   text-align: center;
   margin-bottom: 3rem;
   font-size: 1.1rem;
@@ -35,80 +36,82 @@
   width: 100%;
   padding: 1rem;
   margin-bottom: 1rem;
-  background-color: #2f333d;
-  border: 1px solid #3f4451;
+  background-color: var(--input-background);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
 
 .form-input::placeholder {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
-.add-option-button {
-  width: 100%;
-  padding: 0.75rem;
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 1rem;
-  background-color: #2f333d;
-  border: 2px dashed #3f4451;
-  border-radius: 8px;
-  color: #94a3b8;
-  font-size: 1rem;
+}
+
+.option-item input {
+  flex: 1;
+}
+
+.remove-option-button {
+  padding: 0.75rem;
+  background-color: transparent;
+  border: none;
+  color: var(--error-color);
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
 }
 
-.add-option-button:hover {
-  background-color: #3f4451;
-  border-color: #6366f1;
-  color: #ffffff;
+.remove-option-button:hover {
+  transform: scale(1.1);
 }
 
-.add-option-button svg {
-  width: 20px;
-  height: 20px;
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 .submit-button {
-  width: 100%;
+  flex: 1;
   padding: 1rem;
-  background-color: #6366f1;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 8px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 1rem;
 }
 
 .submit-button:hover {
-  background-color: #4f46e5;
-  transform: translateY(-1px);
+  background-color: var(--primary-hover);
 }
 
 .submit-button:disabled {
-  background-color: #4b5563;
+  background-color: var(--border-color);
   cursor: not-allowed;
-  transform: none;
 }
 
 .error-message {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--error-color);
   padding: 1rem;
   border-radius: 8px;
   margin-top: 1rem;
@@ -127,5 +130,9 @@
 
   .form-title {
     font-size: 2rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
   }
 }

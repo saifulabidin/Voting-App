@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { useLanguage } from '../context/LanguageContext';
 import API from '../api';
+import '../styles/poll-analytics.css';
 
 ChartJS.register(
   CategoryScale,
@@ -48,7 +49,7 @@ const PollAnalytics = () => {
     fetchAnalytics();
   }, [id]);
 
-  if (loading) return <div>{t('loading')}</div>;
+  if (loading) return <div className="loading">{t('loading')}</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!analytics) return null;
 
@@ -72,25 +73,29 @@ const PollAnalytics = () => {
         {
           label: t('views'),
           data: timePoints.map(time => countEventsUpToTimePoint(viewsOverTime, time)),
-          borderColor: 'rgb(75, 192, 192)',
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
           tension: 0.1
         },
         {
           label: t('votes'),
           data: timePoints.map(time => countEventsUpToTimePoint(votesOverTime, time)),
-          borderColor: 'rgb(153, 102, 255)',
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
           tension: 0.1
         },
         {
           label: t('shares'),
           data: timePoints.map(time => countEventsUpToTimePoint(sharesOverTime, time)),
-          borderColor: 'rgb(255, 159, 64)',
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
           tension: 0.1
         },
         {
           label: t('optionAdds'),
           data: timePoints.map(time => countEventsUpToTimePoint(optionsAddedOverTime, time)),
-          borderColor: 'rgb(255, 99, 132)',
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
           tension: 0.1
         }
       ]
@@ -104,21 +109,54 @@ const PollAnalytics = () => {
     plugins: {
       legend: {
         position: 'top',
+        labels: {
+          color: '#94a3b8',
+          padding: 20,
+          font: {
+            size: 12
+          }
+        }
       },
       title: {
         display: true,
-        text: t('engagement')
+        text: t('engagement'),
+        color: '#94a3b8',
+        font: {
+          size: 16,
+          weight: '500'
+        }
       },
       tooltip: {
         mode: 'index',
         intersect: false,
+        backgroundColor: '#242830',
+        titleColor: '#ffffff',
+        bodyColor: '#94a3b8',
+        borderColor: '#3f4451',
+        borderWidth: 1
       }
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          stepSize: 1
+          stepSize: 1,
+          color: '#94a3b8'
+        },
+        grid: {
+          color: '#3f4451',
+          drawBorder: false
+        }
+      },
+      x: {
+        ticks: {
+          color: '#94a3b8',
+          maxRotation: 45,
+          minRotation: 45
+        },
+        grid: {
+          color: '#3f4451',
+          drawBorder: false
         }
       }
     },

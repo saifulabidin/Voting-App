@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import ReCAPTCHA from "react-google-recaptcha";
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
-import './Auth.css';
+import '../styles/auth.css';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -11,6 +12,7 @@ const Login = () => {
     remember: false
   });
   const [error, setError] = useState('');
+  const recaptchaRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
@@ -28,12 +30,22 @@ const Login = () => {
     setError('');
 
     try {
-      const { data } = await API.post('/auth/login', credentials);
+      const recaptchaToken = await recaptchaRef.current.executeAsync();
+      if (!recaptchaToken) {
+        setError(t('pleaseVerifyRecaptcha'));
+        return;
+      }
+
+      const { data } = await API.post('/auth/login', {
+        ...credentials,
+        recaptchaToken
+      });
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || t('loginError'));
+      recaptchaRef.current.reset();
     }
   };
 
@@ -76,6 +88,13 @@ const Login = () => {
             />
             {t('rememberMe')}
           </label>
+          <div className="recaptcha-container">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              size="invisible"
+              sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+            />
+          </div>
           <button type="submit" className="auth-button">
             {t('login')}
           </button>

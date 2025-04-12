@@ -1,7 +1,7 @@
 .auth-container {
   min-height: calc(100vh - 60px);
   padding: 2rem;
-  background-color: #1a1d21;
+  background-color: var(--background-dark);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,14 +10,15 @@
 .auth-form {
   width: 100%;
   max-width: 400px;
-  background: #242830;
+  background: var(--background-light);
   padding: 2.5rem;
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
 }
 
 .auth-form h2 {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 2rem;
   font-weight: 700;
   text-align: center;
@@ -31,29 +32,29 @@
 .form-group input {
   width: 100%;
   padding: 1rem;
-  background-color: #2f333d;
-  border: 1px solid #3f4451;
+  background-color: var(--input-background);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
 
 .form-group input::placeholder {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #10b981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .remember-me {
   display: flex;
   align-items: center;
   margin-bottom: 1.5rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .remember-me input[type="checkbox"] {
@@ -64,10 +65,10 @@
 .auth-button {
   width: 100%;
   padding: 1rem;
-  background-color: #10b981;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 8px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -75,7 +76,7 @@
 }
 
 .auth-button:hover {
-  background-color: #059669;
+  background-color: var(--primary-hover);
   transform: translateY(-1px);
 }
 
@@ -83,7 +84,7 @@
   text-align: center;
   margin: 1.5rem 0;
   position: relative;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .or-divider::before,
@@ -93,7 +94,7 @@
   top: 50%;
   width: 45%;
   height: 1px;
-  background-color: #3f4451;
+  background-color: var(--border-color);
 }
 
 .or-divider::before {
@@ -107,21 +108,20 @@
 .google-button {
   width: 100%;
   padding: 1rem;
-  background-color: #2f333d;
-  border: 1px solid #3f4451;
+  background-color: var(--input-background);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  color: #ffffff;
-  font-size: 1rem;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .google-button:hover {
-  border-color: #10b981;
+  border-color: var(--success-color);
   background-color: rgba(16, 185, 129, 0.1);
 }
 
@@ -133,12 +133,12 @@
 .signup-link {
   text-align: center;
   margin-top: 1.5rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
 .signup-link a {
-  color: #10b981;
+  color: var(--success-color);
   text-decoration: none;
   font-weight: 500;
 }
@@ -149,12 +149,24 @@
 
 .error-message {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--error-color);
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
   text-align: center;
+}
+
+.recaptcha-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.recaptcha-container > div {
+  transform-origin: left top;
+  -webkit-transform-origin: left top;
 }
 
 @media (max-width: 640px) {

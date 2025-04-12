@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
-import './PollList.css';
+import '../styles/poll-list.css';
 
 const PollList = () => {
   const [polls, setPolls] = useState([]);
