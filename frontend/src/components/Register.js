@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -10,13 +10,20 @@ const Register = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const recaptchaRef = useRef(null);
+
+  useEffect(() => {
+    if (window.grecaptcha) {
+      window.grecaptcha.reset();
+    }
+  }, []);
 
   const validatePassword = (password) => {
     const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return strongPassword.test(password);
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
@@ -29,65 +36,87 @@ const Register = () => {
       return;
     }
 
+    const recaptchaValue = recaptchaRef.current?.getValue();
+    if (!recaptchaValue) {
+      setError(t('recaptchaRequired'));
+      return;
+    }
+
     try {
-      await API.post('/auth/register', { username, password });
+      await API.post('/auth/register', { 
+        username, 
+        password,
+        recaptchaToken: recaptchaValue
+      });
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || t('serverError'));
+      if (window.grecaptcha) {
+        window.grecaptcha.reset();
+      }
     }
+  };
+
+  const handleGoogleRegister = () => {
+    // Google registration implementation will go here
   };
 
   return (
     <div className="auth-container">
-      <form onSubmit={handleSubmit} className="auth-form">
+      <form onSubmit={handleRegister} className="auth-form">
         <h2>{t('registerTitle')}</h2>
         {error && <div className="error-message">{error}</div>}
+        
         <div className="form-group">
-          <label htmlFor="username">{t('username')}</label>
           <input
             type="text"
-            id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            minLength="3"
-            placeholder={t('chooseUsername')}
+            placeholder={t('enterEmail')}
           />
         </div>
+
         <div className="form-group">
-          <label htmlFor="password">{t('password')}</label>
           <input
             type="password"
-            id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength="6"
             placeholder={t('choosePassword')}
           />
         </div>
-        <div className="password-requirements">
-          {t('passwordRequirements')}
-          <ul>
-            <li>{t('passwordMinChars')}</li>
-            <li>{t('passwordUppercase')}</li>
-            <li>{t('passwordLowercase')}</li>
-            <li>{t('passwordNumber')}</li>
-            <li>{t('passwordSpecial')}</li>
-          </ul>
-        </div>
+
         <div className="form-group">
-          <label htmlFor="confirmPassword">{t('confirmPassword')}</label>
           <input
             type="password"
-            id="confirmPassword"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            placeholder={t('confirmYourPassword')}
+            placeholder={t('confirmPassword')}
           />
         </div>
+
         <button type="submit" className="auth-button">{t('registerButton')}</button>
+
+        <div className="or-divider">{t('orRegisterWith')}</div>
+
+        <button type="button" className="google-button" onClick={handleGoogleRegister}>
+          <img src="/google-icon.svg" alt="Google" />
+          {t('continueWithGoogle')}
+        </button>
+
+        <div className="recaptcha-container">
+          <div 
+            className="g-recaptcha" 
+            data-sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+            ref={recaptchaRef}
+          ></div>
+        </div>
+
+        <div className="signup-link">
+          {t('alreadyHaveAccount')} <Link to="/login">{t('loginNow')}</Link>
+        </div>
       </form>
     </div>
   );

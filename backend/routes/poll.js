@@ -257,7 +257,7 @@ router.post('/:pollId/vote', optionalAuth, async (req, res) => {
     // Check if IP has already voted
     if (poll.voterIPs.includes(voterIP)) {
       return res.status(400).json({ 
-        message: 'Anda sudah memberikan suara di polling ini',
+        message: 'Anda sudah memberikan suara di polling ini!',
         code: 'DUPLICATE_VOTE'
       });
     }
@@ -270,7 +270,7 @@ router.post('/:pollId/vote', optionalAuth, async (req, res) => {
 
       if (hasVoted) {
         return res.status(400).json({ 
-          message: 'Anda sudah memberikan suara di polling ini',
+          message: 'Anda sudah memberikan suara di polling ini!',
           code: 'DUPLICATE_VOTE'
         });
       }

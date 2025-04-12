@@ -4,11 +4,38 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
+
+// Verify reCAPTCHA token
+const verifyRecaptcha = async (token) => {
+  try {
+    const response = await axios.post(
+      'https://www.google.com/recaptcha/api/siteverify',
+      null,
+      {
+        params: {
+          secret: process.env.RECAPTCHA_SECRET_KEY,
+          response: token,
+        },
+      }
+    );
+    return response.data.success;
+  } catch (error) {
+    console.error('reCAPTCHA verification error:', error);
+    return false;
+  }
+};
 
 // Register
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, recaptchaToken } = req.body;
   
+  // Verify reCAPTCHA first
+  const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+  if (!isRecaptchaValid) {
+    return res.status(400).json({ message: 'reCAPTCHA verification failed' });
+  }
+
   // Add input validation
   if (!username || !password) {
     return res.status(400).json({ message: 'All fields are required' });
@@ -47,6 +74,14 @@ router.post('/register', async (req, res) => {
 
 // Login
 router.post('/login', async (req, res, next) => {
+  const { recaptchaToken } = req.body;
+  
+  // Verify reCAPTCHA first
+  const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+  if (!isRecaptchaValid) {
+    return res.status(400).json({ message: 'reCAPTCHA verification failed' });
+  }
+
   passport.authenticate('local', (err, user, info) => {
     if (err) {
       return res.status(500).json({ message: 'Server error' });

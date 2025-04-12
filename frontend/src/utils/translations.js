@@ -18,7 +18,7 @@ export const translations = {
     voteSuccess: "Vote successfully submitted!",
     voteError: "Failed to submit vote. Please try again.",
     oneVoteError: "You can only vote once per poll",
-    ipVoteError: "You have already voted in this poll from this IP address",
+    ipVoteError: "You have already voted in this poll!",
     invalidOption: "Invalid voting option selected",
     home: "Home",
     createPoll: "Create Poll",
@@ -86,7 +86,18 @@ export const translations = {
     loginRequired: "Please log in to delete polls",
     notAuthorized: "You are not authorized to delete this poll",
     deleteError: "Failed to delete poll. Please try again.",
-    loadError: "Error loading polls"
+    loadError: "Error loading polls",
+    recaptchaRequired: "Please complete the reCAPTCHA verification",
+    recaptchaFailed: "reCAPTCHA verification failed. Please try again.",
+    enterEmail: "Email",
+    rememberMe: "Remember me",
+    orLoginWith: "Or login with",
+    orRegisterWith: "Or register with",
+    continueWithGoogle: "Continue with Google",
+    notAMember: "Not a member?",
+    signUpNow: "Sign up now",
+    alreadyHaveAccount: "Already have an account?",
+    loginNow: "Login now"
   },
   id: {
     loading: "Memuat detail polling...",
@@ -107,7 +118,7 @@ export const translations = {
     voteSuccess: "Vote berhasil dikirim!",
     voteError: "Gagal mengirim vote. Silakan coba lagi.",
     oneVoteError: "Anda hanya dapat memberikan satu suara untuk setiap polling",
-    ipVoteError: "Anda sudah memberikan suara di polling ini dari alamat IP ini",
+    ipVoteError: "Anda sudah memberikan suara di polling ini!",
     invalidOption: "Opsi voting yang dipilih tidak valid",
     home: "Beranda",
     createPoll: "Buat Polling",
@@ -175,6 +186,17 @@ export const translations = {
     loginRequired: "Silakan masuk untuk menghapus polling",
     notAuthorized: "Anda tidak memiliki izin untuk menghapus polling ini",
     deleteError: "Gagal menghapus polling. Silakan coba lagi.",
-    loadError: "Gagal memuat polling"
+    loadError: "Gagal memuat polling",
+    recaptchaRequired: "Mohon lengkapi verifikasi reCAPTCHA",
+    recaptchaFailed: "Verifikasi reCAPTCHA gagal. Silakan coba lagi.",
+    enterEmail: "Email",
+    rememberMe: "Ingat saya",
+    orLoginWith: "Atau masuk dengan",
+    orRegisterWith: "Atau daftar dengan",
+    continueWithGoogle: "Lanjutkan dengan Google",
+    notAMember: "Belum punya akun?",
+    signUpNow: "Daftar sekarang",
+    alreadyHaveAccount: "Sudah punya akun?",
+    loginNow: "Masuk sekarang"
   }
 };
