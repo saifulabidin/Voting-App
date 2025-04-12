@@ -17,13 +17,16 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', true);
 
 // CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || true,
+const corsOptions = {
+  origin: ['https://voting-app-fullstack.netlify.app', process.env.FRONTEND_URL].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  exposedHeaders: ['Authorization'],
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 // Middleware
 app.use(express.json());
