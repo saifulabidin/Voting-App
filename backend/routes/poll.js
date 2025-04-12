@@ -227,24 +227,33 @@ router.get('/', optionalAuth, async (req, res) => {
 // Get single poll with analytics tracking
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
+    // Validate ObjectId first
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid poll ID format' });
+    }
+
     const poll = await Poll.findById(req.params.id)
       .populate('createdBy', 'username')
-      .populate('voters', 'username');
+      .populate('voters', 'username')
+      .lean();  // Use lean() for better performance
       
     if (!poll) {
       return res.status(404).json({ message: 'Poll not found' });
     }
 
-    // Track view
-    await Analytics.trackEvent(poll._id, 'view');
+    // Ensure voterIPs array exists
+    if (!poll.voterIPs) {
+      poll.voterIPs = [];
+    }
+
+    // Track view asynchronously without waiting
+    Analytics.trackEvent(poll._id, 'view').catch(err => {
+      console.error('View tracking error:', err);
+    });
     
     res.json(poll);
   } catch (err) {
     console.error('Error fetching poll:', err);
-    // Check if error is due to invalid ObjectId
-    if (err.name === 'CastError') {
-      return res.status(400).json({ message: 'Invalid poll ID' });
-    }
     res.status(500).json({ 
       message: 'Error fetching poll',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
