@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
+import { formatUsername } from '../utils/pollUtils';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const Navigation = () => {
         {user ? (
           <>
             <Link to="/create">{t('createPoll')}</Link>
-            <span>{t('welcome')}, {user.username}!</span>
+            <span>{t('welcome')}, {formatUsername(user.username)}!</span>
             <button onClick={handleLogout}>{t('logout')}</button>
           </>
         ) : (

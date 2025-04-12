@@ -4,6 +4,7 @@ import API from '../api';
 import PollChart from './PollChart';
 import PollAnalytics from './PollAnalytics';
 import { useLanguage } from '../context/LanguageContext';
+import { formatUsername } from '../utils/pollUtils';
 
 const PollDetails = () => {
   const { id } = useParams();
@@ -167,7 +168,7 @@ const PollDetails = () => {
           </button>
         </div>
         <h1>{poll.title}</h1>
-        <p>{t('createdBy')} {poll.createdBy?.username || t('unknown')}</p>
+        <p>{t('createdBy')} {formatUsername(poll.createdBy?.username) || t('unknown')}</p>
         
         <div className="poll-actions">
           <button onClick={handleShare} className="share-button">

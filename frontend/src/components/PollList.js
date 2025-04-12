@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../api';
 import { useLanguage } from '../context/LanguageContext';
+import { formatUsername } from '../utils/pollUtils';
 
 const PollList = () => {
   const [polls, setPolls] = useState([]);
@@ -115,7 +116,7 @@ const PollList = () => {
               <Link to={`/polls/${poll._id}`}>{poll.title}</Link>
               <div>
                 <span style={{ marginRight: '1rem' }}>
-                  {t('createdBy')} {poll.createdBy?.username || t('unknown')}
+                  {t('createdBy')} {formatUsername(poll.createdBy?.username) || t('unknown')}
                 </span>
                 {poll.createdBy?._id === user?.id && (
                   <button
