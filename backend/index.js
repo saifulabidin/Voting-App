@@ -16,31 +16,34 @@ const PORT = process.env.PORT || 3000;
 // Add trust proxy if behind reverse proxy
 app.set('trust proxy', 1);
 
+// Enable CORS pre-flight for all routes
+app.options('*', cors());
+
 // Middleware
 app.use(cors({
-  origin: ['https://voting-app-fullstack.netlify.app', 'http://localhost:3000'],
+  origin: true, // Allow all origins in development
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  exposedHeaders: ['set-cookie'],
-  preflightContinue: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Access-Control-Allow-Origin'],
+  exposedHeaders: ['Set-Cookie', 'Authorization'],
+  preflightContinue: false,
   optionsSuccessStatus: 204
 }));
 
 app.use(express.json());
 app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:", "http:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:", "http:"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
       connectSrc: ["'self'", "https:", "http:"],
       frameSrc: ["'self'", "https:", "http:"],
       fontSrc: ["'self'", "https:", "data:"]
     }
-  },
-  crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production'
+  }
 }));
 
 // Session configuration with MongoDB store

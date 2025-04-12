@@ -1,19 +1,23 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://voting-app-production-3a8c.up.railway.app',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   }
 });
 
-// Add auth token to requests
+// Add auth token and CORS headers to requests
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Ensure CORS headers are present
+  config.headers['Access-Control-Allow-Credentials'] = true;
   return config;
 });
 
