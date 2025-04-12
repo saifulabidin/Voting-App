@@ -7,41 +7,37 @@ const { validate } = require('../middleware/validate');
 const router = express.Router();
 
 // Middleware to authenticate user
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-
+    
     if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
+      return res.status(401).json({ message: 'No auth token' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    req.user = user;
     next();
   } catch (err) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    console.error('Auth error:', err);
+    return res.status(401).json({ 
+      message: 'Authentication failed',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 
-// Create Poll (Authenticated)
-router.post('/', protect, async (req, res, next) => {
+// Create Poll route with updated error handling
+router.post('/', protect, validate('createPoll'), async (req, res, next) => {
   try {
     const { title, options } = req.body;
 
-    // Validate input
-    if (!title?.trim()) {
-      return res.status(400).json({ 
-        message: 'Title is required'
-      });
-    }
-
-    if (!Array.isArray(options) || options.length < 2) {
-      return res.status(400).json({ 
-        message: 'At least 2 options are required'
-      });
-    }
-
-    // Filter and validate options
     const validOptions = options
       .filter(opt => opt && opt.option?.trim())
       .map(opt => ({
@@ -49,26 +45,18 @@ router.post('/', protect, async (req, res, next) => {
         votes: 0
       }));
 
-    if (validOptions.length < 2) {
-      return res.status(400).json({ 
-        message: 'At least 2 valid options are required'
-      });
-    }
-
     const poll = new Poll({
       title: title.trim(),
       options: validOptions,
-      createdBy: req.user._id
+      createdBy: req.user._id // This should now be available
     });
 
     const createdPoll = await poll.save();
-    
-    // Populate creator info
     await createdPoll.populate('createdBy', 'username');
     
     res.status(201).json(createdPoll);
   } catch (err) {
-    next(err); // Pass to error handler
+    next(err);
   }
 });
 
@@ -107,7 +95,7 @@ router.post('/:pollId/vote', protect, async (req, res) => {
 
     option.votes += 1;
     poll.voters.push(req.user._id);
-    
+        
     await poll.save({ session });
     await session.commitTransaction();
     

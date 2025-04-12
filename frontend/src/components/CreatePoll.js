@@ -37,6 +37,13 @@ const CreatePoll = () => {
     
     setLoading(true);
     try {
+      // Check if user is logged in
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
       const validOptions = options
         .filter(opt => opt.trim())
         .map(option => ({ option: option.trim() }));
@@ -48,7 +55,12 @@ const CreatePoll = () => {
       
       navigate(`/polls/${data._id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create poll');
+      if (err.response?.status === 401) {
+        setError('Please log in to create a poll');
+        navigate('/login');
+      } else {
+        setError(err.response?.data?.message || 'Failed to create poll');
+      }
       console.error('Poll creation error:', err);
     } finally {
       setLoading(false);
