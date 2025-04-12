@@ -24,24 +24,51 @@ const protect = (req, res, next) => {
 };
 
 // Create Poll (Authenticated)
-router.post('/', protect, validate('createPoll'), async (req, res) => {
-  const { title, options } = req.body;
-
+router.post('/', protect, async (req, res, next) => {
   try {
+    const { title, options } = req.body;
+
+    // Validate input
+    if (!title?.trim()) {
+      return res.status(400).json({ 
+        message: 'Title is required'
+      });
+    }
+
+    if (!Array.isArray(options) || options.length < 2) {
+      return res.status(400).json({ 
+        message: 'At least 2 options are required'
+      });
+    }
+
+    // Filter and validate options
+    const validOptions = options
+      .filter(opt => opt && opt.option?.trim())
+      .map(opt => ({
+        option: opt.option.trim(),
+        votes: 0
+      }));
+
+    if (validOptions.length < 2) {
+      return res.status(400).json({ 
+        message: 'At least 2 valid options are required'
+      });
+    }
+
     const poll = new Poll({
-      title,
-      options: options.map(opt => ({ option: opt })),
+      title: title.trim(),
+      options: validOptions,
       createdBy: req.user._id
     });
 
     const createdPoll = await poll.save();
+    
+    // Populate creator info
+    await createdPoll.populate('createdBy', 'username');
+    
     res.status(201).json(createdPoll);
   } catch (err) {
-    console.error('Poll creation error:', err);
-    res.status(500).json({ 
-      message: 'Failed to create poll',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+    next(err); // Pass to error handler
   }
 });
 

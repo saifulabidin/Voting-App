@@ -1,17 +1,57 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../api';
 
 const CreatePoll = () => {
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(['', '']);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const validateForm = () => {
+    if (!title.trim()) {
+      setError('Title is required');
+      return false;
+    }
+    
+    if (title.length < 3) {
+      setError('Title must be at least 3 characters');
+      return false;
+    }
+
+    const validOptions = options.filter(opt => opt.trim());
+    if (validOptions.length < 2) {
+      setError('At least 2 valid options are required');
+      return false;
+    }
+
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
+    if (!validateForm()) return;
+    
+    setLoading(true);
     try {
-      await API.post('/polls', { title, options: options.map((option) => ({ option })) });
-      alert('Poll created successfully');
+      const validOptions = options
+        .filter(opt => opt.trim())
+        .map(option => ({ option: option.trim() }));
+        
+      const { data } = await API.post('/polls', {
+        title: title.trim(),
+        options: validOptions
+      });
+      
+      navigate(`/polls/${data._id}`);
     } catch (err) {
-      console.error(err);
+      setError(err.response?.data?.message || 'Failed to create poll');
+      console.error('Poll creation error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,7 +82,8 @@ const CreatePoll = () => {
       <button type="button" onClick={() => setOptions([...options, ''])}>
         Add Option
       </button>
-      <button type="submit">Create</button>
+      <button type="submit" disabled={loading}>Create</button>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </form>
   );
 };
