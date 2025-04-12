@@ -3,17 +3,16 @@ builder = "NIXPACKS"
 buildCommand = "npm install"
 
 [deploy]
-startCommand = "npm start"
+startCommand = "NODE_ENV=production node index.js"
 healthcheckPath = "/health"
-healthcheckTimeout = 30
-healthcheckInterval = 15
+healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 5
-minReplicas = 1
-maxReplicas = 3
+restartPolicyMaxRetries = 3
 
-[deploy.env]
+[deploy.envs]
 NODE_ENV = "production"
-
-[deploy.lifecycle]
-release = "echo 'Starting Voting App Backend'"
+FRONTEND_URL = "https://voting-app-fullstack.netlify.app"
+PORT = "3000"
+RATE_LIMIT_WINDOW = "15"
+RATE_LIMIT_MAX = "100"
+TRUST_PROXY = "true"

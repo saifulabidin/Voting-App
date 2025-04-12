@@ -1,12 +1,37 @@
 [build]
-  base = "frontend"
+  command = "npm run build"
   publish = "build"
-  command = "CI=false npm run build"
 
-[build.environment]
-  REACT_APP_BACKEND_URL = "https://voting-app-production-3a8c.up.railway.app/api"
+[[redirects]]
+  from = "/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://voting-app-production-3a8c.up.railway.app/:splat"
+  status = 200
+  force = true
+  headers = {X-From = "Netlify"}
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[context.production.environment]
+  REACT_APP_BACKEND_URL = "https://voting-app-production-3a8c.up.railway.app"
+  NODE_ENV = "production"
+
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Access-Control-Allow-Origin = "https://voting-app-production-3a8c.up.railway.app"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, Accept, Origin, X-Requested-With"
+    Access-Control-Allow-Credentials = "true"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: (process.env.REACT_APP_BACKEND_URL || 'https://voting-app-production-3a8c.up.railway.app') + '/api',
+  baseURL: 'https://voting-app-production-3a8c.up.railway.app',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -9,48 +9,71 @@ const API = axios.create({
   }
 });
 
-// Add auth token and CORS headers to requests
+// Request interceptor
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
-  // Ensure CORS headers are present
-  config.headers['Access-Control-Allow-Credentials'] = true;
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
-// Add response interceptor for error handling
+// Response interceptor with enhanced error handling
 API.interceptors.response.use(
   response => response,
   error => {
-    console.error('API Error:', {
+    const errorResponse = {
       url: error.config?.url,
       method: error.config?.method,
       status: error.response?.status,
-      data: error.response?.data,
-      headers: error.config?.headers
-    });
+      code: error.response?.data?.code,
+      message: error.response?.data?.message || error.message,
+      details: error.response?.data?.details,
+      timestamp: new Date().toISOString()
+    };
 
-    // Only redirect to login for protected routes
-    const protectedRoutes = ['/create', '/polls/*/options'];
-    const isProtectedRoute = protectedRoutes.some(route => {
-      const pattern = new RegExp(route.replace('*', '[^/]+'));
-      return pattern.test(error.config?.url);
-    });
+    console.error('API Error:', errorResponse);
 
-    if (error.response?.status === 401 && isProtectedRoute) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    // Handle specific error types
+    switch (error.response?.data?.code) {
+      case 'AUTH_ERROR':
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        break;
+      
+      case 'RATE_LIMIT_EXCEEDED':
+        console.warn('Rate limit exceeded, retrying after cooldown');
+        // Could implement retry logic here
+        break;
+
+      case 'CORS_ERROR':
+        console.error('CORS Error - please check API configuration');
+        break;
+
+      default:
+        // Handle general errors
+        if (error.response?.status === 401) {
+          const publicRoutes = ['/polls', '/health'];
+          const isPublicRoute = publicRoutes.some(route => 
+            error.config?.url?.startsWith(route)
+          );
+          
+          if (!isPublicRoute) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+          }
+        }
     }
 
-    return Promise.reject(error);
+    return Promise.reject(errorResponse);
   }
 );
 
-// Analytics endpoints
+// API endpoints
 API.getAnalytics = (pollId) => API.get(`/polls/${pollId}/analytics`);
 API.trackView = (pollId) => API.post(`/polls/${pollId}/view`);
 API.trackShare = (pollId) => API.post(`/polls/${pollId}/share`);

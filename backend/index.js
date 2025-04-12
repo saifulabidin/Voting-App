@@ -7,6 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const errorHandler = require('./middleware/errorHandler');
+const requestLogger = require('./middleware/requestLogger');
 require('dotenv').config();
 require('./config/passport')(passport);
 
@@ -16,25 +17,40 @@ const PORT = process.env.PORT || 3000;
 // Trust proxy settings for Railway
 app.set('trust proxy', true);
 
+// Request logging
+app.use(requestLogger);
+
 // CORS configuration
 const corsOptions = {
-  origin: ['https://voting-app-fullstack.netlify.app', process.env.FRONTEND_URL].filter(Boolean),
+  origin: 'https://voting-app-fullstack.netlify.app',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'Accept',
+    'Origin',
+    'X-Requested-With',
+    'Access-Control-Allow-Origin',
+    'Access-Control-Allow-Credentials'
+  ],
   exposedHeaders: ['Authorization'],
   optionsSuccessStatus: 200,
-  preflightContinue: false
+  preflightContinue: false,
+  maxAge: 86400 // 24 hours
 };
 
-// Enable pre-flight requests for all routes
-app.options('*', cors(corsOptions));
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
+// Handle OPTIONS preflight requests
+app.options('*', cors(corsOptions));
 
 // Middleware
 app.use(express.json());
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
 }));
 
 // MongoDB Connection - use MONGO_URI from Railway
