@@ -6,12 +6,15 @@ const passport = require('passport');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const errorHandler = require('./middleware/errorHandler'); // Add this line
+const errorHandler = require('./middleware/errorHandler');
 require('dotenv').config();
 require('./config/passport')(passport);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Add trust proxy if behind reverse proxy
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
@@ -20,46 +23,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
-app.use(helmet());
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // Only use secure in production
-    httpOnly: true,
-    sameSite: 'strict',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  },
-  name: 'sessionId' // Change default connect.sid name
-}));
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Add rate limiting
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later',
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-// Apply rate limiting to all routes
-app.use('/api/', apiLimiter);
-
-// Stricter limits for auth routes
-const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // 5 attempts per hour
-  message: 'Too many login attempts, please try again later'
-});
-
-app.use('/auth/login', authLimiter);
-app.use('/auth/register', authLimiter);
-
-// Configure Helmet with relaxed CSP for development
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -75,18 +40,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production'
 }));
 
-// Add CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Add trust proxy if behind reverse proxy
-app.set('trust proxy', 1);
-
-// Update session configuration
+// Session configuration with MongoDB store
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -95,16 +49,42 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'strict',
-    maxAge: 24 * 60 * 60 * 1000
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   },
   name: 'sessionId',
   store: MongoStore.create({ 
     mongoUrl: process.env.MONGO_URI,
-    touchAfter: 24 * 3600 // Only update session once per day
+    touchAfter: 24 * 3600, // Only update session once per day
+    crypto: {
+      secret: process.env.SESSION_SECRET
+    }
   })
 }));
 
-// DB
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Rate limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: 'Too many requests from this IP, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use('/api/', apiLimiter);
+
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  message: 'Too many login attempts, please try again later'
+});
+
+app.use('/auth/login', authLimiter);
+app.use('/auth/register', authLimiter);
+
+// Database connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -112,7 +92,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected'))
 .catch(err => {
   console.error('❌ MongoDB connection error:', err);
-  process.exit(1); // Exit process with failure
+  process.exit(1);
 });
 
 // Routes
@@ -120,24 +100,24 @@ app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/polls', require('./routes/poll'));
 
-// Add basic route for health check
+// Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Add favicon route
+// Favicon
 app.get('/favicon.ico', (req, res) => {
   res.sendStatus(204);
 });
 
-// 404 handler (before error handler)
+// 404 handler
 app.use((req, res, next) => {
   const err = new Error('Route not found');
   err.name = 'NotFoundError';
   next(err);
 });
 
-// Error handler (last middleware)
+// Error handler
 app.use(errorHandler);
 
 // Start server
