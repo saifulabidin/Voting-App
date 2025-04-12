@@ -22,46 +22,72 @@ const analyticsSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  viewsOverTime: [{
-    type: Date,
-    default: Date.now
-  }],
-  votesOverTime: [{
-    type: Date,
-    default: Date.now
-  }],
-  sharesOverTime: [{
-    type: Date,
-    default: Date.now
-  }],
-  optionsAddedOverTime: [{
-    type: Date,
-    default: Date.now
-  }]
-}, {
-  timestamps: true
+  viewsOverTime: [Number],
+  votesOverTime: [Number],
+  sharesOverTime: [Number],
+  optionsAddedOverTime: [Number],
+  uniqueShareIPs: [String]
 });
 
-// Static method to track various events
-analyticsSchema.statics.trackEvent = async function(pollId, eventType) {
-  try {
-    const timeField = eventType + 'sOverTime';
-    const totalField = 'total' + eventType.charAt(0).toUpperCase() + eventType.slice(1) + 's';
-    
-    const update = {
-      $inc: { [totalField]: 1 },
-      $push: { [timeField]: new Date() }
-    };
+analyticsSchema.statics.trackEvent = async function(pollId, eventType, ip) {
+  const now = Date.now();
+  let updateQuery = {};
 
+  switch (eventType) {
+    case 'view':
+      updateQuery = {
+        $inc: { totalViews: 1 },
+        $push: { viewsOverTime: now }
+      };
+      break;
+    case 'vote':
+      updateQuery = {
+        $inc: { totalVotes: 1 },
+        $push: { votesOverTime: now }
+      };
+      break;
+    case 'share':
+      // Only increment share count if IP is not already in uniqueShareIPs
+      updateQuery = {
+        $addToSet: { uniqueShareIPs: ip },
+        $push: { sharesOverTime: now }
+      };
+      break;
+    case 'optionAdd':
+      updateQuery = {
+        $inc: { totalOptionsAdded: 1 },
+        $push: { optionsAddedOverTime: now }
+      };
+      break;
+  }
+
+  const analytics = await this.findOneAndUpdate(
+    { pollId },
+    {
+      ...updateQuery,
+      $setOnInsert: {
+        pollId,
+        totalViews: 0,
+        totalVotes: 0,
+        totalShares: 0,
+        totalOptionsAdded: 0
+      }
+    },
+    {
+      upsert: true,
+      new: true
+    }
+  );
+
+  // For share events, update totalShares based on unique IPs
+  if (eventType === 'share') {
     await this.findOneAndUpdate(
       { pollId },
-      update,
-      { upsert: true, new: true }
+      { $set: { totalShares: analytics.uniqueShareIPs.length } }
     );
-  } catch (err) {
-    console.error(`Analytics tracking error for ${eventType}:`, err);
-    // Don't throw the error so it doesn't affect the main operation
   }
+
+  return analytics;
 };
 
 const Analytics = mongoose.model('Analytics', analyticsSchema);

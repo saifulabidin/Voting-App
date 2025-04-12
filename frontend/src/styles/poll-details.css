@@ -119,6 +119,23 @@
   border-color: var(--primary-color);
 }
 
+.share-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.share-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 640px) {
   .poll-details {
     padding: 1rem;

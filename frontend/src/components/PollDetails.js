@@ -190,20 +190,24 @@ const PollDetails = () => {
           {poll.options.map((option) => (
             <div key={option._id} className="poll-option">
               <span>{option.option} - {option.votes} {t('votes')}</span>
-              {isAuthenticated && poll.voters.includes(currentUserId) ? (
-                <button 
-                  onClick={() => handleRemoveVote(option._id)}
-                  className="vote-button remove"
-                >
-                  {t('removeVote')}
-                </button>
-              ) : (
-                <button 
-                  onClick={() => handleVote(option._id)}
-                  className="vote-button"
-                >
-                  {t('voteButton')}
-                </button>
+              {isAuthenticated && (
+                <>
+                  {poll.voters.includes(currentUserId) ? (
+                    <button 
+                      onClick={() => handleRemoveVote(option._id)}
+                      className="vote-button remove"
+                    >
+                      {t('removeVote')}
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => handleVote(option._id)}
+                      className="vote-button"
+                    >
+                      {t('voteButton')}
+                    </button>
+                  )}
+                </>
               )}
             </div>
           ))}

@@ -387,7 +387,8 @@ router.delete('/:pollId/vote', protect, async (req, res) => {
 router.post('/:pollId/share', async (req, res) => {
   try {
     const { pollId } = req.params;
-    await Analytics.trackEvent(pollId, 'share');
+    const ip = req.ip;
+    await Analytics.trackEvent(pollId, 'share', ip);
     res.json({ success: true });
   } catch (err) {
     console.error('Share tracking error:', err);
@@ -400,14 +401,9 @@ router.get('/:pollId/analytics', protect, async (req, res) => {
   try {
     const { pollId } = req.params;
     
-    // Check if user is poll creator
     const poll = await Poll.findById(pollId);
     if (!poll) {
       return res.status(404).json({ message: 'Poll not found' });
-    }
-    
-    if (poll.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Not authorized to view analytics' });
     }
 
     const analytics = await Analytics.findOne({ pollId });
@@ -426,7 +422,6 @@ router.get('/:pollId/analytics', protect, async (req, res) => {
       });
     }
 
-    // Process time series data for the chart
     const timePoints = [...new Set([
       ...analytics.viewsOverTime,
       ...analytics.votesOverTime,
