@@ -16,7 +16,7 @@ export const translations = {
     loginPrompt: "Log in to add new options or track your votes!",
     loginToVote: "Please log in to vote in this poll",
     voteSuccess: "Vote successfully submitted!",
-    voteError: "Failed to submit vote. Please try again.",
+    voteError: "You can only vote once per poll.",
     oneVoteError: "You can only vote once per poll",
     ipVoteError: "You have already voted in this poll!",
     invalidOption: "Invalid voting option selected",
