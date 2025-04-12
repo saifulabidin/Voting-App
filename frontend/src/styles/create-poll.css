@@ -66,7 +66,7 @@
 }
 
 .remove-option-button {
-  padding: 0.75rem;
+  padding: 0.5rem;
   background-color: transparent;
   border: none;
   color: var(--error-color);
@@ -75,10 +75,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.7;
 }
 
 .remove-option-button:hover {
+  opacity: 1;
   transform: scale(1.1);
+}
+
+.add-option-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0;
+  background-color: transparent;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-option-button svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.add-option-button:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.1);
 }
 
 .form-actions {

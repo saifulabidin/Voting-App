@@ -10,6 +10,12 @@ const PlusIcon = () => (
   </svg>
 );
 
+const TrashIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
+
 const CreatePoll = () => {
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(['', '']);
@@ -81,6 +87,12 @@ const CreatePoll = () => {
     setOptions(newOptions);
   };
 
+  const handleDeleteOption = (index) => {
+    if (options.length <= 2) return;
+    const newOptions = options.filter((_, i) => i !== index);
+    setOptions(newOptions);
+  };
+
   return (
     <div className="create-poll-container">
       <form onSubmit={handleSubmit} className="create-poll-form">
@@ -96,14 +108,25 @@ const CreatePoll = () => {
         />
         
         {options.map((option, index) => (
-          <input
-            key={index}
-            type="text"
-            placeholder={`${t('option')} ${index + 1}`}
-            value={option}
-            onChange={(e) => handleOptionChange(index, e.target.value)}
-            className="form-input"
-          />
+          <div key={index} className="option-item">
+            <input
+              type="text"
+              placeholder={`${t('option')} ${index + 1}`}
+              value={option}
+              onChange={(e) => handleOptionChange(index, e.target.value)}
+              className="form-input"
+            />
+            {options.length > 2 && (
+              <button 
+                type="button"
+                onClick={() => handleDeleteOption(index)}
+                className="remove-option-button"
+                title="Delete option"
+              >
+                <TrashIcon />
+              </button>
+            )}
+          </div>
         ))}
         
         <button 
