@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../api';
+import PollChart from './PollChart';
 
 const PollDetails = () => {
   const { id } = useParams();
@@ -10,29 +11,32 @@ const PollDetails = () => {
   const [loading, setLoading] = useState(true);
   const [voteStatus, setVoteStatus] = useState({
     message: '',
-    type: '' // 'success' or 'error'
+    type: ''
   });
+  const [newOption, setNewOption] = useState('');
+  const [showAddOption, setShowAddOption] = useState(false);
 
   useEffect(() => {
-    const fetchPoll = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const { data } = await API.get(`/polls/${id}`);
-        setPoll(data);
-      } catch (err) {
-        console.error('Error fetching poll:', err);
-        const message = err.response?.data?.message || 'Error loading poll';
-        setError(message);
-        if (err.response?.status === 404) {
-          setTimeout(() => navigate('/polls'), 2000);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPoll();
   }, [id, navigate]);
+
+  const fetchPoll = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await API.get(`/polls/${id}`);
+      setPoll(data);
+    } catch (err) {
+      console.error('Error fetching poll:', err);
+      const message = err.response?.data?.message || 'Error loading poll';
+      setError(message);
+      if (err.response?.status === 404) {
+        setTimeout(() => navigate('/polls'), 2000);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleVote = async (optionId) => {
     try {
@@ -45,7 +49,6 @@ const PollDetails = () => {
       });
     } catch (err) {
       console.error('Voting error:', err);
-      // Handle duplicate vote error
       if (err.response?.status === 400) {
         setVoteStatus({
           message: 'Anda hanya dapat memberikan satu suara untuk setiap polling',
@@ -60,8 +63,31 @@ const PollDetails = () => {
     }
   };
 
+  const handleAddOption = async (e) => {
+    e.preventDefault();
+    if (!newOption.trim()) {
+      setError('Option cannot be empty');
+      return;
+    }
+
+    try {
+      const { data } = await API.post(`/polls/${id}/options`, {
+        option: newOption.trim()
+      });
+      setPoll(data);
+      setNewOption('');
+      setShowAddOption(false);
+      setVoteStatus({
+        message: 'New option added successfully!',
+        type: 'success'
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to add new option');
+    }
+  };
+
   const handleDelete = async () => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus polling ini?')) {
+    if (!window.confirm('Are you sure you want to delete this poll?')) {
       return;
     }
 
@@ -70,7 +96,30 @@ const PollDetails = () => {
       navigate('/polls');
     } catch (err) {
       console.error('Delete error:', err);
-      setError(err.response?.data?.message || 'Gagal menghapus polling');
+      setError(err.response?.data?.message || 'Failed to delete poll');
+    }
+  };
+
+  const handleShare = () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({
+        title: poll.title,
+        text: 'Check out this poll!',
+        url: url
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        setVoteStatus({
+          message: 'Poll link copied to clipboard!',
+          type: 'success'
+        });
+      }).catch(() => {
+        setVoteStatus({
+          message: 'Failed to copy link',
+          type: 'error'
+        });
+      });
     }
   };
 
@@ -79,59 +128,83 @@ const PollDetails = () => {
   if (!poll) return null;
 
   return (
-    <div>
-      <h1>{poll.title}</h1>
-      <p>Created by: {poll.createdBy?.username || 'Unknown'}</p>
-      
-      {/* Add delete button if user is the creator */}
-      {poll.createdBy?._id === localStorage.getItem('userId') && (
-        <button 
-          onClick={handleDelete}
-          style={{
-            backgroundColor: '#ff4444',
-            color: 'white',
-            padding: '8px 16px',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            marginBottom: '20px'
-          }}
-        >
-          Hapus Polling
-        </button>
-      )}
+    <div className="poll-details">
+      <div className="poll-header">
+        <h1>{poll.title}</h1>
+        <p>Created by: {poll.createdBy?.username || 'Unknown'}</p>
+        
+        <div className="poll-actions">
+          <button onClick={handleShare} className="share-button">
+            Share Poll
+          </button>
+          
+          {poll.createdBy?._id === localStorage.getItem('userId') && (
+            <button 
+              onClick={handleDelete}
+              className="delete-button"
+            >
+              Delete Poll
+            </button>
+          )}
+        </div>
+      </div>
 
-      {/* Status Message */}
       {voteStatus.message && (
-        <div style={{ 
-          padding: '10px',
-          borderRadius: '4px',
-          backgroundColor: voteStatus.type === 'success' ? '#e6ffe6' : '#ffe6e6',
-          color: voteStatus.type === 'success' ? '#006600' : '#cc0000',
-          border: `1px solid ${voteStatus.type === 'success' ? '#b3ffb3' : '#ffb3b3'}`
-        }}>
+        <div className={`status-message ${voteStatus.type}`}>
           {voteStatus.message}
         </div>
       )}
 
-      {/* Poll Options */}
-      <ul>
-        {poll.options.map((option) => (
-          <li key={option._id}>
-            {option.option} - {option.votes} votes
-            <button 
-              onClick={() => handleVote(option._id)}
-              disabled={poll.voters.includes(localStorage.getItem('userId'))}
-              style={{
-                marginLeft: '10px',
-                opacity: poll.voters.includes(localStorage.getItem('userId')) ? 0.5 : 1
-              }}
-            >
-              {poll.voters.includes(localStorage.getItem('userId')) ? 'Sudah Vote' : 'Vote'}
-            </button>
-          </li>
-        ))}
-      </ul>
+      <div className="poll-content">
+        <div className="options-list">
+          {poll.options.map((option) => (
+            <div key={option._id} className="poll-option">
+              <span>{option.option} - {option.votes} votes</span>
+              <button 
+                onClick={() => handleVote(option._id)}
+                disabled={poll.voters.includes(localStorage.getItem('userId'))}
+                className="vote-button"
+              >
+                {poll.voters.includes(localStorage.getItem('userId')) ? 'Voted' : 'Vote'}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="poll-chart">
+          <PollChart poll={poll} />
+        </div>
+
+        {!poll.voters.includes(localStorage.getItem('userId')) && (
+          <div className="add-option-section">
+            {!showAddOption ? (
+              <button 
+                onClick={() => setShowAddOption(true)}
+                className="add-option-button"
+              >
+                Add New Option
+              </button>
+            ) : (
+              <form onSubmit={handleAddOption} className="add-option-form">
+                <input
+                  type="text"
+                  value={newOption}
+                  onChange={(e) => setNewOption(e.target.value)}
+                  placeholder="Enter new option"
+                  required
+                />
+                <button type="submit">Add Option</button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowAddOption(false)}
+                >
+                  Cancel
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

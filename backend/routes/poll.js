@@ -152,6 +152,54 @@ router.post('/:pollId/vote', protect, async (req, res) => {
   }
 });
 
+// Add new option to poll
+router.post('/:pollId/options', protect, async (req, res) => {
+  const { pollId } = req.params;
+  const { option } = req.body;
+
+  if (!option?.trim()) {
+    return res.status(400).json({ message: 'Option text is required' });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId);
+    
+    if (!poll) {
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+
+    // Check if option already exists (case insensitive)
+    const optionExists = poll.options.some(opt => 
+      opt.option.toLowerCase() === option.trim().toLowerCase()
+    );
+
+    if (optionExists) {
+      return res.status(400).json({ message: 'This option already exists' });
+    }
+
+    // Add new option
+    poll.options.push({
+      option: option.trim(),
+      votes: 0
+    });
+
+    await poll.save();
+    
+    // Return updated poll with populated fields
+    const updatedPoll = await Poll.findById(pollId)
+      .populate('createdBy', 'username')
+      .populate('voters', 'username');
+      
+    res.json(updatedPoll);
+  } catch (err) {
+    console.error('Add option error:', err);
+    res.status(500).json({ 
+      message: 'Failed to add new option',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
 // Delete Poll (Authenticated)
 router.delete('/:pollId', protect, async (req, res) => {
   const { pollId } = req.params;
