@@ -10,23 +10,29 @@ const router = express.Router();
 // Middleware to authenticate user if token exists
 const optionalAuth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
     
     if (!token) {
       req.user = null;
       return next();
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    
-    if (!user) {
-      req.user = null;
-      return next();
-    }
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      
+      if (!user) {
+        req.user = null;
+        return next();
+      }
 
-    req.user = user;
-    next();
+      req.user = user;
+      next();
+    } catch (jwtError) {
+      req.user = null;
+      next();
+    }
   } catch (err) {
     req.user = null;
     next();
@@ -36,21 +42,29 @@ const optionalAuth = async (req, res, next) => {
 // Middleware to require authentication
 const protect = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
     if (!token) {
       return res.status(401).json({ message: 'No auth token' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
-    }
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
 
-    req.user = user;
-    next();
+      req.user = user;
+      next();
+    } catch (jwtError) {
+      return res.status(401).json({ 
+        message: 'Invalid or expired token',
+        error: process.env.NODE_ENV === 'development' ? jwtError.message : undefined
+      });
+    }
   } catch (err) {
     console.error('Auth error:', err);
     return res.status(401).json({ 

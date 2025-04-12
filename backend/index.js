@@ -21,11 +21,14 @@ const corsOptions = {
   origin: ['https://voting-app-fullstack.netlify.app', process.env.FRONTEND_URL].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
   exposedHeaders: ['Authorization'],
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 };
 
+// Enable pre-flight requests for all routes
+app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Middleware
@@ -83,17 +86,17 @@ const authLimiter = rateLimit({
   message: 'Too many login attempts, please try again later'
 });
 
-app.use('/auth/login', authLimiter);
-app.use('/auth/register', authLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
-app.use('/', require('./routes/index'));
-app.use('/auth', require('./routes/auth'));
-app.use('/polls', require('./routes/poll'));
+app.use('/api', require('./routes/index'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/polls', require('./routes/poll'));
 
 // Health check endpoint with detailed status
 app.get('/health', (req, res) => {

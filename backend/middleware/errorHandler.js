@@ -1,16 +1,14 @@
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', {
+    name: err.name,
     message: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    path: req.path,
-    method: req.method
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 
   // Handle path-to-regexp errors
-  if (err.name === 'TypeError' && err.message.includes('Missing parameter name')) {
+  if (err instanceof TypeError && err.message.includes('Missing parameter name')) {
     return res.status(400).json({
-      status: 'error',
-      message: 'Invalid route parameters',
+      message: 'Invalid URL format',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
@@ -18,17 +16,15 @@ const errorHandler = (err, req, res, next) => {
   // Handle validation errors
   if (err.name === 'ValidationError') {
     return res.status(400).json({
-      status: 'error',
       message: 'Validation error',
       errors: Object.values(err.errors).map(e => e.message)
     });
   }
 
-  // Handle cast errors (e.g., invalid ObjectId)
+  // Handle MongoDB errors
   if (err.name === 'CastError') {
     return res.status(400).json({
-      status: 'error',
-      message: 'Invalid parameter format',
+      message: 'Invalid ID format',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
@@ -36,14 +32,13 @@ const errorHandler = (err, req, res, next) => {
   // Handle JWT errors
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({
-      status: 'error',
-      message: 'Invalid authentication token'
+      message: 'Invalid token',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 
-  // Handle other errors
+  // Default error
   res.status(err.status || 500).json({
-    status: 'error',
     message: err.message || 'Internal server error',
     error: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
