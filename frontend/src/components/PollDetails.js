@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../api';
 import PollChart from './PollChart';
+import PollAnalytics from './PollAnalytics';
 import { useLanguage } from '../context/LanguageContext';
 
 const PollDetails = () => {
@@ -42,6 +43,13 @@ const PollDetails = () => {
   useEffect(() => {
     fetchPoll();
   }, [fetchPoll]);
+
+  useEffect(() => {
+    if (poll && poll._id) {
+      // Track view when poll is loaded
+      API.trackView(poll._id).catch(console.error);
+    }
+  }, [poll?._id]);
 
   const handleVote = async (optionId) => {
     try {
@@ -121,16 +129,24 @@ const PollDetails = () => {
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const url = window.location.href;
-    if (navigator.share) {
-      navigator.share({
-        title: poll.title,
-        text: t('shareText'),
-        url: url
-      })
-    } else {
-      navigator.clipboard.writeText(url)
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: poll.title,
+          text: t('shareText'),
+          url: url
+        });
+        // Track successful share
+        await API.trackShare(poll._id);
+      } else {
+        await navigator.clipboard.writeText(url);
+        // Track clipboard share
+        await API.trackShare(poll._id);
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
     }
   };
 
@@ -207,6 +223,8 @@ const PollDetails = () => {
         <div className="poll-chart">
           <PollChart poll={poll} />
         </div>
+
+        <PollAnalytics />
 
         {isAuthenticated && !poll.voters.includes(currentUserId) && (
           <div className="add-option-section">

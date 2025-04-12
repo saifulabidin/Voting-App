@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://voting-app-production-3a8c.up.railway.app',
+  baseURL: process.env.REACT_APP_BACKEND_URL || 'https://voting-app-production-3a8c.up.railway.app',
   headers: {
     'Content-Type': 'application/json'
   }
@@ -37,5 +37,10 @@ API.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Analytics endpoints with authentication
+API.getAnalytics = (pollId) => API.get(`/polls/${pollId}/analytics`);
+API.trackView = (pollId) => API.post(`/polls/${pollId}/view`);
+API.trackShare = (pollId) => API.post(`/polls/${pollId}/share`);
 
 export default API;

@@ -1,5 +1,6 @@
 const express = require('express');
 const Poll = require('../models/Poll');
+const Analytics = require('../models/Analytics');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -120,6 +121,7 @@ router.delete('/:pollId', protect, async (req, res) => {
   }
 });
 
+// Add option with analytics tracking
 router.post('/:pollId/options', protect, async (req, res) => {
   const { pollId } = req.params;
   const { option } = req.body;
@@ -152,6 +154,9 @@ router.post('/:pollId/options', protect, async (req, res) => {
 
     await poll.save();
     
+    // Track option add
+    await Analytics.trackEvent(pollId, 'optionAdd');
+    
     // Return updated poll with populated fields
     const updatedPoll = await Poll.findById(pollId)
       .populate('createdBy', 'username')
@@ -168,15 +173,39 @@ router.post('/:pollId/options', protect, async (req, res) => {
 });
 
 // Public routes - optional authentication
+// Modified get polls route with pagination and search
 router.get('/', optionalAuth, async (req, res) => {
   try {
-    const polls = await Poll.find().populate('createdBy', 'username');
-    res.json(polls);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const skip = (page - 1) * limit;
+
+    // Create search query
+    const searchQuery = search 
+      ? { title: { $regex: search, $options: 'i' } }
+      : {};
+
+    const totalPolls = await Poll.countDocuments(searchQuery);
+    const polls = await Poll.find(searchQuery)
+      .populate('createdBy', 'username')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      polls,
+      currentPage: page,
+      totalPages: Math.ceil(totalPolls / limit),
+      totalPolls
+    });
   } catch (err) {
+    console.error('Fetch polls error:', err);
     res.status(500).json({ message: 'Failed to fetch polls' });
   }
 });
 
+// Get single poll with analytics tracking
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const poll = await Poll.findById(req.params.id)
@@ -186,6 +215,9 @@ router.get('/:id', optionalAuth, async (req, res) => {
     if (!poll) {
       return res.status(404).json({ message: 'Poll not found' });
     }
+
+    // Track view
+    await Analytics.trackEvent(poll._id, 'view');
     
     res.json(poll);
   } catch (err) {
@@ -201,7 +233,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-// Modified vote endpoint to support anonymous voting
+// Modified vote endpoint to support anonymous voting with analytics tracking
 router.post('/:pollId/vote', optionalAuth, async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -244,6 +276,10 @@ router.post('/:pollId/vote', optionalAuth, async (req, res) => {
     }
         
     await poll.save({ session });
+    
+    // Track vote
+    await Analytics.trackEvent(pollId, 'vote');
+    
     await session.commitTransaction();
     
     // Return updated poll with user info
@@ -320,5 +356,81 @@ router.delete('/:pollId/vote', protect, async (req, res) => {
     session.endSession();
   }
 });
+
+// Share tracking endpoint
+router.post('/:pollId/share', async (req, res) => {
+  try {
+    const { pollId } = req.params;
+    await Analytics.trackEvent(pollId, 'share');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Share tracking error:', err);
+    res.status(500).json({ message: 'Failed to track share' });
+  }
+});
+
+// Remove duplicate endpoints and combine analytics routes
+router.get('/:pollId/analytics', protect, async (req, res) => {
+  try {
+    const { pollId } = req.params;
+    
+    // Check if user is poll creator
+    const poll = await Poll.findById(pollId);
+    if (!poll) {
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+    
+    if (poll.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to view analytics' });
+    }
+
+    const analytics = await Analytics.findOne({ pollId });
+    
+    if (!analytics) {
+      return res.json({ 
+        pollId, 
+        totalViews: 0, 
+        totalVotes: 0, 
+        totalShares: 0, 
+        totalOptionsAdded: 0,
+        viewsOverTime: [],
+        votesOverTime: [],
+        sharesOverTime: [],
+        optionsAddedOverTime: []
+      });
+    }
+
+    // Process time series data for the chart
+    const timePoints = [...new Set([
+      ...analytics.viewsOverTime,
+      ...analytics.votesOverTime,
+      ...analytics.sharesOverTime,
+      ...analytics.optionsAddedOverTime
+    ])].sort((a, b) => a - b);
+
+    res.json({
+      ...analytics.toObject(),
+      timePoints
+    });
+  } catch (err) {
+    console.error('Analytics error:', err);
+    res.status(500).json({ message: 'Failed to fetch analytics' });
+  }
+});
+
+// Optimize event tracking endpoints
+const trackEvent = async (req, res, eventType) => {
+  try {
+    const { pollId } = req.params;
+    await Analytics.trackEvent(pollId, eventType);
+    res.status(200).json({ message: `${eventType} recorded` });
+  } catch (err) {
+    console.error(`Error recording ${eventType}:`, err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+router.post('/:pollId/view', async (req, res) => trackEvent(req, res, 'view'));
+router.post('/:pollId/share', async (req, res) => trackEvent(req, res, 'share'));
 
 module.exports = router;
