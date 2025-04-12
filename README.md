@@ -45,7 +45,7 @@ A full-stack voting application built with React and Node.js that allows users t
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/saifulabidin/Voting-App.git
 cd Voting-App
 ```
 
@@ -139,7 +139,7 @@ Aplikasi voting full-stack yang dibangun dengan React dan Node.js yang memungkin
 
 1. Clone repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/saifulabidin/Voting-App.git
 cd Voting-App
 ```
 
