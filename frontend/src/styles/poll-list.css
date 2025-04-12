@@ -216,6 +216,7 @@
   .page-title {
     font-size: 2rem;
     margin-bottom: 1.5rem;
+    align-items: center;
   }
 
   .search-form {
