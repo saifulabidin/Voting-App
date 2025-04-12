@@ -92,17 +92,6 @@ const authLimiter = rateLimit({
 app.use('/auth/login', authLimiter);
 app.use('/auth/register', authLimiter);
 
-// Database connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch(err => {
-  console.error('❌ MongoDB connection error:', err);
-  process.exit(1);
-});
-
 // Routes
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
@@ -163,7 +152,49 @@ app.use((req, res, next) => {
 // Error handler
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// Wrap server startup in async function for better error handling
+const startServer = async () => {
+  try {
+    // Connect to MongoDB first
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('✅ MongoDB connected');
+
+    // Only start server after successful DB connection
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+
+    // Handle server errors
+    server.on('error', (error) => {
+      console.error('Server error:', error);
+      process.exit(1);
+    });
+
+    // Graceful shutdown
+    const shutdown = async () => {
+      console.log('Shutting down gracefully...');
+      try {
+        await mongoose.connection.close();
+        server.close(() => {
+          console.log('Server closed');
+          process.exit(0);
+        });
+      } catch (err) {
+        console.error('Error during shutdown:', err);
+        process.exit(1);
+      }
+    };
+
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
+
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
