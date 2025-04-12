@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://voting-app-production-3a8c.up.railway.app',
+  baseURL: 'https://voting-app-production-3a8c.up.railway.app/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -35,6 +35,16 @@ API.interceptors.response.use(
     };
 
     console.error('API Error:', errorResponse);
+
+    if (!error.response) {
+      // Network error
+      console.error('Network Error - Backend may be down or unreachable');
+      return Promise.reject({
+        ...errorResponse,
+        code: 'NETWORK_ERROR',
+        message: 'Unable to connect to the server. Please try again later.'
+      });
+    }
 
     // Handle specific error types
     switch (error.response?.data?.code) {

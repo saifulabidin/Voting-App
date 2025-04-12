@@ -5,16 +5,35 @@ const errorHandler = (err, req, res, next) => {
     message: err.message,
     path: req.path,
     method: req.method,
+    origin: req.headers.origin,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 
-  // Handle CORS errors
-  if (err.name === 'TypeError' && err.message.includes('CORS')) {
-    return res.status(400).json({
+  // Enhanced CORS error handling
+  if (err.name === 'CORSError' || (err.message && err.message.includes('CORS'))) {
+    // Set CORS headers even in error responses
+    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'https://voting-app-fullstack.netlify.app');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    return res.status(403).json({
       status: 'error',
       code: 'CORS_ERROR',
-      message: 'CORS validation failed',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+      message: 'Cross-Origin Request Blocked',
+      details: process.env.NODE_ENV === 'development' ? {
+        origin: req.headers.origin,
+        method: req.method,
+        path: req.path,
+        allowedOrigin: process.env.FRONTEND_URL || 'https://voting-app-fullstack.netlify.app'
+      } : undefined
+    });
+  }
+
+  // Handle MongoDB connection errors
+  if (err.name === 'MongoError' || err.name === 'MongooseError') {
+    return res.status(503).json({
+      status: 'error',
+      code: 'DB_ERROR',
+      message: 'Database service unavailable'
     });
   }
 
@@ -23,8 +42,7 @@ const errorHandler = (err, req, res, next) => {
     return res.status(400).json({
       status: 'error',
       code: 'INVALID_URL',
-      message: 'Invalid URL format',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+      message: 'Invalid URL format'
     });
   }
 
@@ -41,33 +59,12 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Handle MongoDB errors
-  if (err.name === 'CastError') {
-    return res.status(400).json({
+  // Handle network errors
+  if (err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET') {
+    return res.status(503).json({
       status: 'error',
-      code: 'INVALID_ID',
-      message: 'Invalid ID format',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
-  }
-
-  // Handle JWT errors
-  if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
-    return res.status(401).json({
-      status: 'error',
-      code: 'AUTH_ERROR',
-      message: err.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
-  }
-
-  // Handle rate limit errors
-  if (err.name === 'RateLimitExceeded') {
-    return res.status(429).json({
-      status: 'error',
-      code: 'RATE_LIMIT_EXCEEDED',
-      message: 'Too many requests',
-      retryAfter: err.retryAfter
+      code: 'NETWORK_ERROR',
+      message: 'Service temporarily unavailable'
     });
   }
 

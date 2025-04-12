@@ -17,44 +17,32 @@ const PORT = process.env.PORT || 3000;
 // Trust proxy settings for Railway
 app.set('trust proxy', true);
 
-// Request logging
-app.use(requestLogger);
-
-// CORS configuration
+// CORS configuration - must be first in middleware chain
 const corsOptions = {
-  origin: 'https://voting-app-fullstack.netlify.app',
+  origin: process.env.FRONTEND_URL || 'https://voting-app-fullstack.netlify.app',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'Accept',
-    'Origin',
-    'X-Requested-With',
-    'Access-Control-Allow-Origin',
-    'Access-Control-Allow-Credentials'
-  ],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
   exposedHeaders: ['Authorization'],
-  optionsSuccessStatus: 200,
+  maxAge: 86400, // 24 hours in seconds
   preflightContinue: false,
-  maxAge: 86400 // 24 hours
+  optionsSuccessStatus: 204
 };
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
-app.use(cors({
-  origin: "https://voting-app-fullstack.netlify.app",
-}));
 
-// Handle OPTIONS preflight requests
-app.options('*', cors(corsOptions));
+// Request logging
+app.use(requestLogger);
 
-// Middleware
-app.use(express.json());
+// Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
 }));
+
+// Parse JSON bodies
+app.use(express.json());
 
 // MongoDB Connection - use MONGO_URI from Railway
 const mongoUri = process.env.MONGO_URI;
