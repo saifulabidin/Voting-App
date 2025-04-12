@@ -42,6 +42,9 @@ const corsOptions = {
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
+app.use(cors({
+  origin: "https://voting-app-fullstack.netlify.app",
+}));
 
 // Handle OPTIONS preflight requests
 app.options('*', cors(corsOptions));
